@@ -10,7 +10,6 @@ History::History(QWidget *parent)
 {
     ui->setupUi(this);
     connect(ui->deleteButton, &QPushButton::clicked, this, &History::on_deleteButton_clicked);
-    connect(ui->backButton, &QPushButton::clicked,  this, &History::on_backButton_clicked);
     connect(ui->editButton, &QPushButton::clicked, this, &History::on_editButton_clicked);
     connect(ui->filterBox, &QComboBox::currentTextChanged, this, &History::refreshTable);
 }

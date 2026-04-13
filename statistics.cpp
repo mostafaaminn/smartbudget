@@ -15,7 +15,6 @@ statistics::statistics(QWidget *parent)
 {
     ui->setupUi(this);
 
-    connect(ui->back1Button, &QPushButton::clicked, this, &statistics::on_back1Button_clicked);
     connect(ui->budgetFood, &QLineEdit::textChanged, this, &statistics::updateStats);
     connect(ui->budgetRent, &QLineEdit::textChanged, this, &statistics::updateStats);
     connect(ui->budgetTransportation, &QLineEdit::textChanged, this, &statistics::updateStats);
@@ -59,8 +58,11 @@ void statistics::updateStats()
                 monthExpenses += amount;
         }
 
-        // Category totals
-        categoryTotals[t.getCategory()] += amount;
+        // Category totals for expenses only
+        if (type == "expense")
+        {
+            categoryTotals[t.getCategory()] += amount;
+        }
     }
 
     int totalTransactions = manager->getAllTransactions().size();
