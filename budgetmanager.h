@@ -2,7 +2,8 @@
 #define BUDGETMANAGER_H
 
 #include <vector>
-#include "Transaction.h"
+#include <QString>
+#include "transaction.h"
 
 class BudgetManager {
 private:
@@ -19,7 +20,8 @@ public:
     double getBalance() const;
     double getTotalIncome() const;
     double getTotalExpenses() const;
-
+    int getTransactionCount() const;
+    QString getHighestSpendingCategory() const;
 
     std::vector<Transaction> getAllTransactions() const;
 };

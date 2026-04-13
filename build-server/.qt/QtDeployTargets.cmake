@@ -1,0 +1,4 @@
+set(__QT_DEPLOY_TARGET_SmartBudget_FILE /Users/mostafaamin/smartbudget/build-server/SmartBudget.app/Contents/MacOS/SmartBudget)
+set(__QT_DEPLOY_TARGET_SmartBudget_TYPE EXECUTABLE)
+set(__QT_DEPLOY_TARGET_SmartBudgetServer_FILE /Users/mostafaamin/smartbudget/build-server/SmartBudgetServer)
+set(__QT_DEPLOY_TARGET_SmartBudgetServer_TYPE EXECUTABLE)

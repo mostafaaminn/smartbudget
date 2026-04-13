@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "addtransaction.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -15,9 +16,17 @@ class MainWindow : public QMainWindow
 
 public:
     explicit MainWindow(QWidget *parent = nullptr);
-    ~MainWindow() override;
+    ~MainWindow();
 
+private slots:
+    void showDashboard();
+    void showTransactions();
+    void showReports();
+    void updateDashboardTotals(double balance, double income, double expenses,
+                               int count, QString highestCategory);
 private:
     Ui::MainWindow *ui;
+    Addtransaction *transactionWidget;
 };
+
 #endif

@@ -1,14 +1,47 @@
 #include "addtransaction.h"
 #include "ui_addtransaction.h"
-#include <QDebug>
+
+#include <QMessageBox>
+#include <QDate>
+#include <QStringList>
 
 Addtransaction::Addtransaction(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Addtransaction)
+    , networkClient(new NetworkClient(this))
 {
     ui->setupUi(this);
 
-    connect(ui->pushButton, &QPushButton::clicked, this, &Addtransaction::onAddClicked);
+    setWindowTitle("SmartBudget - Add Transaction");
+
+    if (ui->comboBox->count() == 0) {
+        ui->comboBox->addItem("income");
+        ui->comboBox->addItem("expense");
+    }
+
+    connect(ui->pushButton, &QPushButton::clicked,
+            this, &Addtransaction::onAddClicked);
+
+    connect(ui->deleteButton, &QPushButton::clicked,
+            this, &Addtransaction::onDeleteClicked);
+
+    connect(networkClient, &NetworkClient::statusChanged,
+            ui->networkStatusLabel, &QLabel::setText);
+
+    connect(networkClient, &NetworkClient::errorOccurred,
+            this, [this](const QString& error) {
+                QMessageBox::warning(this, "Network Error", error);
+            });
+
+    connect(networkClient, &NetworkClient::messageSent,
+            this, [this]() {
+                QMessageBox::information(this, "Network", "Transaction sent to server successfully.");
+            });
+
+    networkClient->connectToServer("127.0.0.1", 12345);
+
+    updateSummaryLabels();
+    updateTransactionList();
 }
 
 Addtransaction::~Addtransaction()
@@ -16,14 +49,128 @@ Addtransaction::~Addtransaction()
     delete ui;
 }
 
-void Addtransaction::onAddClicked() {
+void Addtransaction::onAddClicked()
+{
+    QString amountText = ui->amountInput->text().trimmed();
+    QString type = ui->comboBox->currentText().trimmed().toLower();
+    QString category = ui->categoryInput->text().trimmed();
 
-    QString amountText = ui->amountInput->text();
-    QString type = ui->comboBox->currentText();
-    QString category = ui->categoryInput->text();
+    if (amountText.isEmpty()) {
+        QMessageBox::warning(this, "Invalid Input", "Please enter an amount.");
+        return;
+    }
 
-    qDebug() << "Amount:" << amountText;
-    qDebug() << "Type:" << type;
-    qDebug() << "Category:" << category;
-    qDebug() << "Button clicked!";
+    bool ok = false;
+    double amount = amountText.toDouble(&ok);
+
+    if (!ok || amount <= 0) {
+        QMessageBox::warning(this, "Invalid Input", "Please enter a valid positive number for the amount.");
+        return;
+    }
+
+    if (category.isEmpty()) {
+        QMessageBox::warning(this, "Invalid Input", "Please enter a category.");
+        return;
+    }
+
+    if (type != "income" && type != "expense") {
+        QMessageBox::warning(this, "Invalid Input", "Please choose either income or expense.");
+        return;
+    }
+
+    QDate date = QDate::currentDate();
+    Transaction newTransaction(amount, type, category, date);
+    manager.addTransaction(newTransaction);
+
+    updateSummaryLabels();
+    updateTransactionList();
+
+    emit totalsChanged(
+        manager.getBalance(),
+        manager.getTotalIncome(),
+        manager.getTotalExpenses(),
+        manager.getTransactionCount(),
+        manager.getHighestSpendingCategory()
+        );
+
+    QString jsonMessage = buildTransactionJson(amount, type, category, date);
+    networkClient->sendMessage((jsonMessage + "\n").toStdString());
+
+    QMessageBox::information(this, "Success", "Transaction added successfully.");
+
+    clearInputs();
+}
+
+void Addtransaction::onDeleteClicked()
+{
+    int currentRow = ui->transactionListWidget->currentRow();
+
+    if (currentRow < 0) {
+        QMessageBox::warning(this, "No Selection", "Please select a transaction to delete.");
+        return;
+    }
+
+    manager.removeTransaction(currentRow);
+
+    updateSummaryLabels();
+    updateTransactionList();
+
+    emit totalsChanged(
+        manager.getBalance(),
+        manager.getTotalIncome(),
+        manager.getTotalExpenses(),
+        manager.getTransactionCount(),
+        manager.getHighestSpendingCategory()
+        );
+
+    QMessageBox::information(this, "Deleted", "Transaction deleted successfully.");
+}
+
+void Addtransaction::clearInputs()
+{
+    ui->amountInput->clear();
+    ui->categoryInput->clear();
+    ui->comboBox->setCurrentIndex(0);
+}
+
+void Addtransaction::updateSummaryLabels()
+{
+    ui->balanceValueLabel->setText(QString::number(manager.getBalance()));
+    ui->incomeValueLabel->setText(QString::number(manager.getTotalIncome()));
+    ui->expensesValueLabel->setText(QString::number(manager.getTotalExpenses()));
+}
+
+void Addtransaction::updateTransactionList()
+{
+    ui->transactionListWidget->clear();
+
+    std::vector<Transaction> transactions = manager.getAllTransactions();
+
+    for (const Transaction& t : transactions) {
+        QString itemText =
+            t.getType() + " | " +
+            QString::number(t.getAmount()) + " | " +
+            t.getCategory() + " | " +
+            t.getDate().toString("yyyy-MM-dd");
+
+        ui->transactionListWidget->addItem(itemText);
+    }
+}
+
+QString Addtransaction::buildTransactionJson(double amount, const QString& type, const QString& category, const QDate& date) const
+{
+    QString safeType = type;
+    QString safeCategory = category;
+
+    safeType.replace("\\", "\\\\");
+    safeType.replace("\"", "\\\"");
+
+    safeCategory.replace("\\", "\\\\");
+    safeCategory.replace("\"", "\\\"");
+
+    return QString("{\"action\":\"add_transaction\",\"type\":\"%1\",\"category\":\"%2\",\"amount\":%3,\"date\":\"%4\"}")
+        .arg(safeType)
+        .arg(safeCategory)
+        .arg(QString::number(amount, 'f', 2))
+        .arg(date.toString(Qt::ISODate));
 }

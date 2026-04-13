@@ -1,0 +1,47 @@
+Start testing: Apr 13 00:08 EET
+----------------------------------------------------------
+1/1 Testing: SmartBudgetTests
+1/1 Test: SmartBudgetTests
+Command: "/Users/mostafaamin/smartbudget/build-tests/SmartBudgetTests"
+Directory: /Users/mostafaamin/smartbudget/build-tests
+"SmartBudgetTests" start time: Apr 13 00:08 EET
+Output:
+----------------------------------------------------------
+Running main() from /private/tmp/googletest-20250910-5249-qce8ci/googletest-1.17.0/googletest/src/gtest_main.cc
+[==========] Running 10 tests from 1 test suite.
+[----------] Global test environment set-up.
+[----------] 10 tests from BudgetManagerTest
+[ RUN      ] BudgetManagerTest.StartsEmpty
+[       OK ] BudgetManagerTest.StartsEmpty (0 ms)
+[ RUN      ] BudgetManagerTest.AddIncomeTransactionUpdatesBalanceAndIncome
+[       OK ] BudgetManagerTest.AddIncomeTransactionUpdatesBalanceAndIncome (0 ms)
+[ RUN      ] BudgetManagerTest.AddExpenseTransactionUpdatesBalanceAndExpenses
+[       OK ] BudgetManagerTest.AddExpenseTransactionUpdatesBalanceAndExpenses (0 ms)
+[ RUN      ] BudgetManagerTest.MultipleTransactionsCalculateCorrectTotals
+[       OK ] BudgetManagerTest.MultipleTransactionsCalculateCorrectTotals (0 ms)
+[ RUN      ] BudgetManagerTest.RemoveTransactionDeletesCorrectItem
+[       OK ] BudgetManagerTest.RemoveTransactionDeletesCorrectItem (0 ms)
+[ RUN      ] BudgetManagerTest.RemoveInvalidIndexDoesNothing
+[       OK ] BudgetManagerTest.RemoveInvalidIndexDoesNothing (0 ms)
+[ RUN      ] BudgetManagerTest.HighestSpendingCategoryReturnsCorrectCategory
+[       OK ] BudgetManagerTest.HighestSpendingCategoryReturnsCorrectCategory (0 ms)
+[ RUN      ] BudgetManagerTest.HighestSpendingCategoryIgnoresIncome
+[       OK ] BudgetManagerTest.HighestSpendingCategoryIgnoresIncome (0 ms)
+[ RUN      ] BudgetManagerTest.HighestSpendingCategoryReturnsAllTiedCategories
+[       OK ] BudgetManagerTest.HighestSpendingCategoryReturnsAllTiedCategories (0 ms)
+[ RUN      ] BudgetManagerTest.HighestSpendingCategoryReturnsNoneWhenNoExpenses
+[       OK ] BudgetManagerTest.HighestSpendingCategoryReturnsNoneWhenNoExpenses (0 ms)
+[----------] 10 tests from BudgetManagerTest (0 ms total)
+
+[----------] Global test environment tear-down
+[==========] 10 tests from 1 test suite ran. (0 ms total)
+[  PASSED  ] 10 tests.
+<end of output>
+Test time =   0.04 sec
+----------------------------------------------------------
+Test Passed.
+"SmartBudgetTests" end time: Apr 13 00:08 EET
+"SmartBudgetTests" time elapsed: 00:00:00
+----------------------------------------------------------
+
+End testing: Apr 13 00:08 EET

@@ -1,0 +1,12 @@
+/Users/mostafaamin/smartbudget/build-server/CMakeFiles/SmartBudget.dir
+/Users/mostafaamin/smartbudget/build-server/CMakeFiles/SmartBudgetServer.dir
+/Users/mostafaamin/smartbudget/build-server/CMakeFiles/edit_cache.dir
+/Users/mostafaamin/smartbudget/build-server/CMakeFiles/rebuild_cache.dir
+/Users/mostafaamin/smartbudget/build-server/CMakeFiles/list_install_components.dir
+/Users/mostafaamin/smartbudget/build-server/CMakeFiles/install.dir
+/Users/mostafaamin/smartbudget/build-server/CMakeFiles/install/local.dir
+/Users/mostafaamin/smartbudget/build-server/CMakeFiles/install/strip.dir
+/Users/mostafaamin/smartbudget/build-server/CMakeFiles/SmartBudget_autogen_timestamp_deps.dir
+/Users/mostafaamin/smartbudget/build-server/CMakeFiles/SmartBudget_autogen.dir
+/Users/mostafaamin/smartbudget/build-server/CMakeFiles/SmartBudgetServer_autogen_timestamp_deps.dir
+/Users/mostafaamin/smartbudget/build-server/CMakeFiles/SmartBudgetServer_autogen.dir
