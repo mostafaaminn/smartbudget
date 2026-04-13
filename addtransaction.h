@@ -15,20 +15,22 @@ class Addtransaction : public QWidget
 
 private slots:
     void onAddClicked();
-    void onDeleteClicked();
 
 signals:
     void totalsChanged(double balance, double income, double expenses,
                        int count, QString highestCategory);
+    void historyRequested();
+    void statisticsRequested();
 
 public:
     explicit Addtransaction(QWidget *parent = nullptr);
     ~Addtransaction();
 
+    BudgetManager* getManager();
+
 private:
     void clearInputs();
     void updateSummaryLabels();
-    void updateTransactionList();
     QString buildTransactionJson(double amount, const QString& type, const QString& category, const QDate& date) const;
 
     Ui::Addtransaction *ui;

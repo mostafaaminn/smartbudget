@@ -30,7 +30,7 @@
    <widget class="QPushButton" name="transactionsButton">
     <property name="geometry">
      <rect>
-      <x>310</x>
+      <x>210</x>
       <y>10</y>
       <width>100</width>
       <height>32</height>
@@ -38,19 +38,6 @@
     </property>
     <property name="text">
      <string>Transactions</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="reportsButton">
-    <property name="geometry">
-     <rect>
-      <x>620</x>
-      <y>10</y>
-      <width>100</width>
-      <height>32</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Reports</string>
     </property>
    </widget>
    <widget class="QStackedWidget" name="stackedWidget">
@@ -63,7 +50,7 @@
      </rect>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>3</number>
     </property>
     <widget class="QWidget" name="dashboardPage">
      <widget class="QLabel" name="label">
@@ -158,151 +145,8 @@
       </property>
      </widget>
     </widget>
-    <widget class="QWidget" name="reportsPage">
-     <widget class="QLabel" name="label_6">
-      <property name="geometry">
-       <rect>
-        <x>370</x>
-        <y>10</y>
-        <width>58</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Reports</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_5">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>40</y>
-        <width>121</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Transaction Count:</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_7">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>80</y>
-        <width>181</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Highest Spending Category:</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_8">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>120</y>
-        <width>58</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Income:</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_9">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>160</y>
-        <width>71</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Expenses:</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="label_10">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>200</y>
-        <width>58</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>Balance:</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="reportsCountLabel">
-      <property name="geometry">
-       <rect>
-        <x>130</x>
-        <y>40</y>
-        <width>58</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>0</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="reportsCategoryLabel">
-      <property name="geometry">
-       <rect>
-        <x>190</x>
-        <y>80</y>
-        <width>58</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>none</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="reportsIncomeLabel">
-      <property name="geometry">
-       <rect>
-        <x>60</x>
-        <y>120</y>
-        <width>58</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>0</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="reportsExpensesLabel">
-      <property name="geometry">
-       <rect>
-        <x>80</x>
-        <y>160</y>
-        <width>58</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>0</string>
-      </property>
-     </widget>
-     <widget class="QLabel" name="reportsBalanceLabel">
-      <property name="geometry">
-       <rect>
-        <x>70</x>
-        <y>200</y>
-        <width>58</width>
-        <height>16</height>
-       </rect>
-      </property>
-      <property name="text">
-       <string>0</string>
-      </property>
-     </widget>
-    </widget>
+    <widget class="QWidget" name="historyPage"/>
+    <widget class="QWidget" name="statisticsPage"/>
     <widget class="QWidget" name="transactionsPage">
      <widget class="QScrollArea" name="transactionsScrollArea">
       <property name="geometry">
@@ -328,6 +172,32 @@
       </widget>
      </widget>
     </widget>
+   </widget>
+   <widget class="QPushButton" name="historyButton">
+    <property name="geometry">
+     <rect>
+      <x>410</x>
+      <y>10</y>
+      <width>100</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>History</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="statisticsButton">
+    <property name="geometry">
+     <rect>
+      <x>610</x>
+      <y>10</y>
+      <width>100</width>
+      <height>32</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Statistics</string>
+    </property>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">

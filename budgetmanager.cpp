@@ -1,6 +1,7 @@
 #include "budgetManager.h"
 #include <map>
 #include <QStringList>
+#include <QDate>
 
 BudgetManager::BudgetManager() {
     // nothing needed for now (vector starts empty automatically)
@@ -94,4 +95,23 @@ QString BudgetManager::getHighestSpendingCategory() const
     }
 
     return highestCategories.join(", ");
+}
+
+void BudgetManager::updateTransaction(int index, double amount, QString type, QString category)
+{
+    if (index < 0 || index >= transactions.size()) {
+        return;
+    }
+
+    transactions[index] = Transaction(amount, type, category, QDate::currentDate());
+}
+
+void BudgetManager::setBudget(const QString& category, double amount)
+{
+    categoryBudgets[category] = amount;
+}
+
+double BudgetManager::getBudget(const QString& category) const
+{
+    return categoryBudgets.value(category, 0);
 }

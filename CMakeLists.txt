@@ -30,6 +30,12 @@ qt_add_executable(SmartBudget
     addtransaction.ui
     networkclient.h
     networkclient.cpp
+    history.h
+    history.cpp
+    history.ui
+    statistics.h
+    statistics.cpp
+    statistics.ui
 )
 
 target_compile_definitions(SmartBudget PRIVATE BOOST_ERROR_CODE_HEADER_ONLY)

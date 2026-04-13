@@ -22,9 +22,6 @@ Addtransaction::Addtransaction(QWidget *parent)
     connect(ui->pushButton, &QPushButton::clicked,
             this, &Addtransaction::onAddClicked);
 
-    connect(ui->deleteButton, &QPushButton::clicked,
-            this, &Addtransaction::onDeleteClicked);
-
     connect(networkClient, &NetworkClient::statusChanged,
             ui->networkStatusLabel, &QLabel::setText);
 
@@ -41,7 +38,6 @@ Addtransaction::Addtransaction(QWidget *parent)
     networkClient->connectToServer("127.0.0.1", 12345);
 
     updateSummaryLabels();
-    updateTransactionList();
 }
 
 Addtransaction::~Addtransaction()
@@ -83,7 +79,6 @@ void Addtransaction::onAddClicked()
     manager.addTransaction(newTransaction);
 
     updateSummaryLabels();
-    updateTransactionList();
 
     emit totalsChanged(
         manager.getBalance(),
@@ -101,31 +96,6 @@ void Addtransaction::onAddClicked()
     clearInputs();
 }
 
-void Addtransaction::onDeleteClicked()
-{
-    int currentRow = ui->transactionListWidget->currentRow();
-
-    if (currentRow < 0) {
-        QMessageBox::warning(this, "No Selection", "Please select a transaction to delete.");
-        return;
-    }
-
-    manager.removeTransaction(currentRow);
-
-    updateSummaryLabels();
-    updateTransactionList();
-
-    emit totalsChanged(
-        manager.getBalance(),
-        manager.getTotalIncome(),
-        manager.getTotalExpenses(),
-        manager.getTransactionCount(),
-        manager.getHighestSpendingCategory()
-        );
-
-    QMessageBox::information(this, "Deleted", "Transaction deleted successfully.");
-}
-
 void Addtransaction::clearInputs()
 {
     ui->amountInput->clear();
@@ -138,23 +108,6 @@ void Addtransaction::updateSummaryLabels()
     ui->balanceValueLabel->setText(QString::number(manager.getBalance()));
     ui->incomeValueLabel->setText(QString::number(manager.getTotalIncome()));
     ui->expensesValueLabel->setText(QString::number(manager.getTotalExpenses()));
-}
-
-void Addtransaction::updateTransactionList()
-{
-    ui->transactionListWidget->clear();
-
-    std::vector<Transaction> transactions = manager.getAllTransactions();
-
-    for (const Transaction& t : transactions) {
-        QString itemText =
-            t.getType() + " | " +
-            QString::number(t.getAmount()) + " | " +
-            t.getCategory() + " | " +
-            t.getDate().toString("yyyy-MM-dd");
-
-        ui->transactionListWidget->addItem(itemText);
-    }
 }
 
 QString Addtransaction::buildTransactionJson(double amount, const QString& type, const QString& category, const QDate& date) const
@@ -173,4 +126,9 @@ QString Addtransaction::buildTransactionJson(double amount, const QString& type,
         .arg(safeCategory)
         .arg(QString::number(amount, 'f', 2))
         .arg(date.toString(Qt::ISODate));
+}
+
+BudgetManager* Addtransaction::getManager()
+{
+    return &manager;
 }
