@@ -36,6 +36,10 @@ qt_add_executable(SmartBudget
     statistics.h
     statistics.cpp
     statistics.ui
+    JsonTools.h
+    JsonTools.cpp
+    NetworkServer.h
+    NetworkServer.cpp
 )
 
 target_compile_definitions(SmartBudget PRIVATE BOOST_ERROR_CODE_HEADER_ONLY)
