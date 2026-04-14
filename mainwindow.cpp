@@ -14,7 +14,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     setWindowTitle("SmartBudget");
 
-    // Put the widgets inside the stacked widget pages
     ui->transactionsScrollArea->setWidget(transactionWidget);
     ui->transactionsScrollArea->setWidgetResizable(true);
 
@@ -26,14 +25,12 @@ MainWindow::MainWindow(QWidget *parent)
     statisticsLayout->setContentsMargins(0, 0, 0, 0);
     statisticsLayout->addWidget(statisticsWidget);
 
-    // Share the same BudgetManager from Addtransaction
     historyWidget->setManager(transactionWidget->getManager());
     historyWidget->setMainWindow(transactionWidget);
 
     statisticsWidget->setManager(transactionWidget->getManager());
     statisticsWidget->setMainWindow(transactionWidget);
 
-    // Top navigation
     connect(ui->dashboardButton, &QPushButton::clicked,
             this, &MainWindow::showDashboard);
 

@@ -31,11 +31,10 @@ public:
 private:
     void clearInputs();
     void updateSummaryLabels();
-    QString buildTransactionJson(double amount, const QString& type, const QString& category, const QDate& date) const;
 
     Ui::Addtransaction *ui;
     BudgetManager manager;
     NetworkClient *networkClient;
 };
 
-#endif // ADDTRANSACTION_H
+#endif

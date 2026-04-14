@@ -42,4 +42,4 @@ private:
     Addtransaction* mainWindow = nullptr;
 };
 
-#endif // HISTORY_H
+#endif

@@ -38,37 +38,37 @@ void statistics::updateStats()
 
     double monthIncome = 0;
     double monthExpenses = 0;
-
     QDate now = QDate::currentDate();
-
     QMap<QString, double> categoryTotals;
 
     for (const Transaction& t : manager->getAllTransactions())
     {
         QString type = t.getType().trimmed().toLower();
         double amount = t.getAmount();
+        QString category = t.getCategory().trimmed();
 
-        // Monthly summary
-        if (t.getDate().month() == now.month() &&
-            t.getDate().year() == now.year())
-        {
-            if (type == "income")
-                monthIncome += amount;
-            else if (type == "expense")
-                monthExpenses += amount;
+        if (category.compare("Transport", Qt::CaseInsensitive) == 0) {
+            category = "Transportation";
         }
 
-        // Category totals for expenses only
+        if (t.getDate().month() == now.month() && t.getDate().year() == now.year())
+        {
+            if (type == "income") {
+                monthIncome += amount;
+            } else if (type == "expense") {
+                monthExpenses += amount;
+            }
+        }
+
         if (type == "expense")
         {
-            categoryTotals[t.getCategory()] += amount;
+            categoryTotals[category] += amount;
         }
     }
 
-    int totalTransactions = manager->getAllTransactions().size();
+    int totalTransactions = static_cast<int>(manager->getAllTransactions().size());
     double monthBalance = monthIncome - monthExpenses;
 
-    // Highest category
     QString highestCategory = "None";
     double highestValue = 0;
 
@@ -81,7 +81,6 @@ void statistics::updateStats()
         }
     }
 
-    // UI updates
     ui->monthIncome->setText(QString::number(monthIncome));
     ui->monthExpenses->setText(QString::number(monthExpenses));
     ui->monthSaving->setText(QString::number(monthBalance));
@@ -95,80 +94,44 @@ void statistics::updateStats()
     ui->Health->setText(QString::number(categoryTotals["Health"]));
     ui->Other->setText(QString::number(categoryTotals["Other"]));
     ui->Rent->setText(QString::number(categoryTotals["Rent"]));
-    ui->Transportation->setText(QString::number(categoryTotals["Transport"]));
+    ui->Transportation->setText(QString::number(categoryTotals["Transportation"]));
     ui->Utilities->setText(QString::number(categoryTotals["Utilities"]));
 
     double foodBudget = ui->budgetFood->text().toDouble();
     manager->setBudget("Food", foodBudget);
-
-    double foodSpent = categoryTotals["Food"];
-    double foodRemaining = foodBudget - foodSpent;
-
-    ui->remainingFood->setText(QString::number(foodRemaining));
+    ui->remainingFood->setText(QString::number(foodBudget - categoryTotals["Food"]));
 
     double rentBudget = ui->budgetRent->text().toDouble();
     manager->setBudget("Rent", rentBudget);
-
-    double rentSpent = categoryTotals["Rent"];
-    double rentRemaining = rentBudget - rentSpent;
-
-    ui->remainingRent->setText(QString::number(rentRemaining));
+    ui->remainingRent->setText(QString::number(rentBudget - categoryTotals["Rent"]));
 
     double groceriesBudget = ui->budgetGroceries->text().toDouble();
     manager->setBudget("Groceries", groceriesBudget);
-
-    double groceriesSpent = categoryTotals["Groceries"];
-    double groceriesRemaining = groceriesBudget - groceriesSpent;
-
-    ui->remainingGroceries->setText(QString::number(groceriesRemaining));
+    ui->remainingGroceries->setText(QString::number(groceriesBudget - categoryTotals["Groceries"]));
 
     double transportationBudget = ui->budgetTransportation->text().toDouble();
     manager->setBudget("Transportation", transportationBudget);
-
-    double transportationSpent = categoryTotals["Transportation"];
-    double transportationRemaining = transportationBudget - transportationSpent;
-
-    ui->remainingTransportation->setText(QString::number(transportationRemaining));
+    ui->remainingTransportation->setText(QString::number(transportationBudget - categoryTotals["Transportation"]));
 
     double utilitiesBudget = ui->budgetUtilities->text().toDouble();
     manager->setBudget("Utilities", utilitiesBudget);
-
-    double utilitiesSpent = categoryTotals["Utilities"];
-    double utilitiesRemaining = utilitiesBudget - utilitiesSpent;
-
-    ui->remainingUtilities->setText(QString::number(utilitiesRemaining));
+    ui->remainingUtilities->setText(QString::number(utilitiesBudget - categoryTotals["Utilities"]));
 
     double otherBudget = ui->budgetOther->text().toDouble();
     manager->setBudget("Other", otherBudget);
-
-    double otherSpent = categoryTotals["Other"];
-    double otherRemaining = otherBudget - otherSpent;
-
-    ui->remainingOther->setText(QString::number(otherRemaining));
+    ui->remainingOther->setText(QString::number(otherBudget - categoryTotals["Other"]));
 
     double entertainmentBudget = ui->budgetEntertainment->text().toDouble();
     manager->setBudget("Entertainment", entertainmentBudget);
-
-    double entertainmentSpent = categoryTotals["Entertainment"];
-    double entertainmentRemaining = entertainmentBudget - entertainmentSpent;
-
-    ui->remainingEntertainment->setText(QString::number(entertainmentRemaining));
+    ui->remainingEntertainment->setText(QString::number(entertainmentBudget - categoryTotals["Entertainment"]));
 
     double healthBudget = ui->budgetHealth->text().toDouble();
     manager->setBudget("Health", healthBudget);
-
-    double healthSpent = categoryTotals["Health"];
-    double healthRemaining = healthBudget - healthSpent;
-
-    ui->remainingHealth->setText(QString::number(healthRemaining));
+    ui->remainingHealth->setText(QString::number(healthBudget - categoryTotals["Health"]));
 
     double educationBudget = ui->budgetEducation->text().toDouble();
     manager->setBudget("Education", educationBudget);
-
-    double educationSpent = categoryTotals["Education"];
-    double educationRemaining = educationBudget - educationSpent;
-
-    ui->remainingEducation->setText(QString::number(educationRemaining));
+    ui->remainingEducation->setText(QString::number(educationBudget - categoryTotals["Education"]));
 }
 
 void statistics::setMainWindow(Addtransaction* w)

@@ -36,4 +36,4 @@ private slots:
     void on_back1Button_clicked();
 };
 
-#endif // STATISTICS_H
+#endif

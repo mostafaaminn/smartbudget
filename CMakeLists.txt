@@ -38,8 +38,6 @@ qt_add_executable(SmartBudget
     statistics.ui
     JsonTools.h
     JsonTools.cpp
-    NetworkServer.h
-    NetworkServer.cpp
 )
 
 target_compile_definitions(SmartBudget PRIVATE BOOST_ERROR_CODE_HEADER_ONLY)
@@ -52,12 +50,21 @@ target_link_libraries(SmartBudget
 
 add_executable(SmartBudgetServer
     server.cpp
+    NetworkServer.cpp
+    NetworkServer.h
+    JsonTools.cpp
+    JsonTools.h
+    transaction.cpp
+    transaction.h
+    budgetmanager.cpp
+    budgetmanager.h
 )
 
 target_compile_definitions(SmartBudgetServer PRIVATE BOOST_ERROR_CODE_HEADER_ONLY)
 
 target_link_libraries(SmartBudgetServer
     PRIVATE
+        Qt::Core
 )
 
 enable_testing()

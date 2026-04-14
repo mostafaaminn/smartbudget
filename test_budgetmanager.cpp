@@ -123,3 +123,44 @@ TEST(BudgetManagerTest, HighestSpendingCategoryReturnsNoneWhenNoExpenses)
 
     EXPECT_EQ(manager.getHighestSpendingCategory(), "None");
 }
+
+TEST(BudgetManagerTest, UpdateTransactionChangesStoredValues)
+{
+    BudgetManager manager;
+
+    manager.addTransaction(Transaction(100.0, "expense", "Food", QDate(2026, 4, 12)));
+    manager.updateTransaction(0, 250.0, "income", "Salary");
+
+    auto transactions = manager.getAllTransactions();
+
+    ASSERT_EQ(transactions.size(), 1);
+    EXPECT_DOUBLE_EQ(transactions[0].getAmount(), 250.0);
+    EXPECT_EQ(transactions[0].getType(), "income");
+    EXPECT_EQ(transactions[0].getCategory(), "Salary");
+}
+
+TEST(BudgetManagerTest, SetAndGetBudgetWorksCorrectly)
+{
+    BudgetManager manager;
+
+    manager.setBudget("Food", 1000.0);
+
+    EXPECT_DOUBLE_EQ(manager.getBudget("Food"), 1000.0);
+    EXPECT_DOUBLE_EQ(manager.getBudget("Rent"), 0.0);
+}
+
+TEST(BudgetManagerTest, RemoveFirstTransactionUpdatesTotalsCorrectly)
+{
+    BudgetManager manager;
+
+    manager.addTransaction(Transaction(1000.0, "income", "salary", QDate(2026, 4, 12)));
+    manager.addTransaction(Transaction(200.0, "expense", "food", QDate(2026, 4, 12)));
+    manager.addTransaction(Transaction(300.0, "expense", "transport", QDate(2026, 4, 12)));
+
+    manager.removeTransaction(0);
+
+    EXPECT_DOUBLE_EQ(manager.getBalance(), -500.0);
+    EXPECT_DOUBLE_EQ(manager.getTotalIncome(), 0.0);
+    EXPECT_DOUBLE_EQ(manager.getTotalExpenses(), 500.0);
+    EXPECT_EQ(manager.getTransactionCount(), 2);
+}

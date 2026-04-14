@@ -5,6 +5,9 @@
 #include <QDate>
 #include <QStringList>
 
+#include "JsonTools.h"
+#include "transaction.h"
+
 Addtransaction::Addtransaction(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Addtransaction)
@@ -76,8 +79,8 @@ void Addtransaction::onAddClicked()
 
     QDate date = QDate::currentDate();
     Transaction newTransaction(amount, type, category, date);
-    manager.addTransaction(newTransaction);
 
+    manager.addTransaction(newTransaction);
     updateSummaryLabels();
 
     emit totalsChanged(
@@ -88,11 +91,9 @@ void Addtransaction::onAddClicked()
         manager.getHighestSpendingCategory()
         );
 
-    QString jsonMessage = buildTransactionJson(amount, type, category, date);
-    networkClient->sendMessage((jsonMessage + "\n").toStdString());
+    networkClient->sendMessage(JsonTools::addTransactionMsg(newTransaction));
 
     QMessageBox::information(this, "Success", "Transaction added successfully.");
-
     clearInputs();
 }
 
@@ -108,24 +109,6 @@ void Addtransaction::updateSummaryLabels()
     ui->balanceValueLabel->setText(QString::number(manager.getBalance()));
     ui->incomeValueLabel->setText(QString::number(manager.getTotalIncome()));
     ui->expensesValueLabel->setText(QString::number(manager.getTotalExpenses()));
-}
-
-QString Addtransaction::buildTransactionJson(double amount, const QString& type, const QString& category, const QDate& date) const
-{
-    QString safeType = type;
-    QString safeCategory = category;
-
-    safeType.replace("\\", "\\\\");
-    safeType.replace("\"", "\\\"");
-
-    safeCategory.replace("\\", "\\\\");
-    safeCategory.replace("\"", "\\\"");
-
-    return QString("{\"action\":\"add_transaction\",\"type\":\"%1\",\"category\":\"%2\",\"amount\":%3,\"date\":\"%4\"}")
-        .arg(safeType)
-        .arg(safeCategory)
-        .arg(QString::number(amount, 'f', 2))
-        .arg(date.toString(Qt::ISODate));
 }
 
 BudgetManager* Addtransaction::getManager()

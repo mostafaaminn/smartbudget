@@ -1,23 +1,26 @@
-#include "budgetManager.h"
+#include "budgetmanager.h"
 #include <map>
 #include <QStringList>
 #include <QDate>
 
-BudgetManager::BudgetManager() {
-    // nothing needed for now (vector starts empty automatically)
+BudgetManager::BudgetManager()
+{
 }
 
-void BudgetManager::addTransaction(const Transaction& t) {
+void BudgetManager::addTransaction(const Transaction& t)
+{
     transactions.push_back(t);
 }
 
-void BudgetManager::removeTransaction(int index) {
-    if (index >= 0 && index < transactions.size()) {
+void BudgetManager::removeTransaction(int index)
+{
+    if (index >= 0 && index < static_cast<int>(transactions.size())) {
         transactions.erase(transactions.begin() + index);
     }
 }
 
-double BudgetManager::getBalance() const {
+double BudgetManager::getBalance() const
+{
     double balance = 0;
 
     for (const Transaction& t : transactions) {
@@ -31,7 +34,8 @@ double BudgetManager::getBalance() const {
     return balance;
 }
 
-double BudgetManager::getTotalIncome() const {
+double BudgetManager::getTotalIncome() const
+{
     double total = 0;
 
     for (const Transaction& t : transactions) {
@@ -43,7 +47,8 @@ double BudgetManager::getTotalIncome() const {
     return total;
 }
 
-double BudgetManager::getTotalExpenses() const {
+double BudgetManager::getTotalExpenses() const
+{
     double total = 0;
 
     for (const Transaction& t : transactions) {
@@ -55,13 +60,14 @@ double BudgetManager::getTotalExpenses() const {
     return total;
 }
 
-std::vector<Transaction> BudgetManager::getAllTransactions() const {
+std::vector<Transaction> BudgetManager::getAllTransactions() const
+{
     return transactions;
 }
 
 int BudgetManager::getTransactionCount() const
 {
-    return transactions.size();
+    return static_cast<int>(transactions.size());
 }
 
 QString BudgetManager::getHighestSpendingCategory() const
@@ -99,7 +105,7 @@ QString BudgetManager::getHighestSpendingCategory() const
 
 void BudgetManager::updateTransaction(int index, double amount, QString type, QString category)
 {
-    if (index < 0 || index >= transactions.size()) {
+    if (index < 0 || index >= static_cast<int>(transactions.size())) {
         return;
     }
 
