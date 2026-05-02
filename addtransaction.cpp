@@ -1,46 +1,26 @@
 #include "addtransaction.h"
 #include "ui_addtransaction.h"
-
-#include <QMessageBox>
-#include <QDate>
-#include <QStringList>
-
-#include "JsonTools.h"
+#include "history.h"
+#include "statistics.h"
 #include "transaction.h"
+#include <QDate>
+#include <QMessageBox>
 
 Addtransaction::Addtransaction(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Addtransaction)
-    , networkClient(new NetworkClient(this))
 {
     ui->setupUi(this);
 
-    setWindowTitle("SmartBudget - Add Transaction");
-
-    if (ui->comboBox->count() == 0) {
-        ui->comboBox->addItem("income");
-        ui->comboBox->addItem("expense");
-    }
-
-    connect(ui->pushButton, &QPushButton::clicked,
+    connect(ui->pushButton,   &QPushButton::clicked,
             this, &Addtransaction::onAddClicked);
+    connect(ui->historyButton,&QPushButton::clicked,
+            this, &Addtransaction::on_historyButton_clicked);
+    connect(ui->Summary,      &QPushButton::clicked,
+            this, &Addtransaction::on_summaryButton_clicked);
 
-    connect(networkClient, &NetworkClient::statusChanged,
-            ui->networkStatusLabel, &QLabel::setText);
-
-    connect(networkClient, &NetworkClient::errorOccurred,
-            this, [this](const QString& error) {
-                QMessageBox::warning(this, "Network Error", error);
-            });
-
-    connect(networkClient, &NetworkClient::messageSent,
-            this, [this]() {
-                QMessageBox::information(this, "Network", "Transaction sent to server successfully.");
-            });
-
-    networkClient->connectToServer("127.0.0.1", 12345);
-
-    updateSummaryLabels();
+    connect(ui->comboDisplayCurrency, &QComboBox::currentTextChanged,
+            this, &Addtransaction::onDisplayCurrencyChanged);
 }
 
 Addtransaction::~Addtransaction()
@@ -51,67 +31,97 @@ Addtransaction::~Addtransaction()
 void Addtransaction::onAddClicked()
 {
     QString amountText = ui->amountInput->text().trimmed();
-    QString type = ui->comboBox->currentText().trimmed().toLower();
-    QString category = ui->categoryInput->text().trimmed();
+    QString type       = ui->comboBox->currentText();
+    QString category   = ui->categoryBox->currentText();
+    QString currency   = ui->comboCurrency->currentText();
 
-    if (amountText.isEmpty()) {
-        QMessageBox::warning(this, "Invalid Input", "Please enter an amount.");
+    if (amountText.isEmpty())
+    {
+        QMessageBox::warning(this, "Input Error", "Please enter an amount.");
         return;
     }
-
     bool ok = false;
     double amount = amountText.toDouble(&ok);
-
-    if (!ok || amount <= 0) {
-        QMessageBox::warning(this, "Invalid Input", "Please enter a valid positive number for the amount.");
+    if (!ok || amount <= 0)
+    {
+        QMessageBox::warning(this, "Input Error", "Please enter a valid positive amount.");
+        return;
+    }
+    if (type == "Type")
+    {
+        QMessageBox::warning(this, "Input Error", "Please select a transaction type.");
+        return;
+    }
+    if (category == "Category")
+    {
+        QMessageBox::warning(this, "Input Error", "Please select a category.");
+        return;
+    }
+    if (currency == "Currency")
+    {
+        QMessageBox::warning(this, "Input Error", "Please select a currency.");
         return;
     }
 
-    if (category.isEmpty()) {
-        QMessageBox::warning(this, "Invalid Input", "Please enter a category.");
-        return;
-    }
-
-    if (type != "income" && type != "expense") {
-        QMessageBox::warning(this, "Invalid Input", "Please choose either income or expense.");
-        return;
-    }
-
-    QDate date = QDate::currentDate();
-    Transaction newTransaction(amount, type, category, date);
-
-    manager.addTransaction(newTransaction);
-    updateSummaryLabels();
-
-    emit totalsChanged(
-        manager.getBalance(),
-        manager.getTotalIncome(),
-        manager.getTotalExpenses(),
-        manager.getTransactionCount(),
-        manager.getHighestSpendingCategory()
-        );
-
-    networkClient->sendMessage(JsonTools::addTransactionMsg(newTransaction));
-
-    QMessageBox::information(this, "Success", "Transaction added successfully.");
-    clearInputs();
-}
-
-void Addtransaction::clearInputs()
-{
+    manager.addTransaction(Transaction(amount, type, category,
+                                       QDate::currentDate(), currency));
     ui->amountInput->clear();
-    ui->categoryInput->clear();
-    ui->comboBox->setCurrentIndex(0);
+    refreshLabels();
 }
 
-void Addtransaction::updateSummaryLabels()
+void Addtransaction::on_historyButton_clicked()
 {
-    ui->balanceValueLabel->setText(QString::number(manager.getBalance()));
-    ui->incomeValueLabel->setText(QString::number(manager.getTotalIncome()));
-    ui->expensesValueLabel->setText(QString::number(manager.getTotalExpenses()));
+    if (!historyWindow)
+    {
+        historyWindow = new History();
+        historyWindow->setManager(&manager);
+        historyWindow->setMainWindow(this);
+    }
+
+    historyWindow->refreshTable();
+    historyWindow->show();
+    this->hide();
 }
 
-BudgetManager* Addtransaction::getManager()
+void Addtransaction::on_summaryButton_clicked()
 {
-    return &manager;
+    if (!statsWindow)
+    {
+        statsWindow = new statistics();
+        statsWindow->setManager(&manager);
+        statsWindow->setMainWindow(this);
+    }
+
+    statsWindow->updateStats();
+    statsWindow->show();
+    this->hide();
+}
+
+// FIX 3: actually parse the currency string and push it to the manager,
+//         then refresh every open child window
+void Addtransaction::onDisplayCurrencyChanged(const QString& text)
+{
+    // text is "Display-USD", "Display-EGP", or the placeholder "Currency"
+    QString cur = text;
+    cur.remove("Display-");   // -> "USD", "EGP", or "Currency"
+    cur = cur.trimmed().toUpper();
+
+    if (cur == "CURRENCY") return;  // placeholder selected — do nothing
+
+    manager.setDisplayCurrency(cur);
+    refreshLabels();
+
+    if (historyWindow && historyWindow->isVisible())
+        historyWindow->refreshTable();
+
+    if (statsWindow && statsWindow->isVisible())
+        statsWindow->updateStats();
+}
+
+void Addtransaction::refreshLabels()
+{
+    QString cur = manager.getDisplayCurrency();
+    ui->incomeLabel ->setText(QString::number(manager.getTotalIncome(),   'f', 2) + " " + cur);
+    ui->expenseLabel->setText(QString::number(manager.getTotalExpenses(), 'f', 2) + " " + cur);
+    ui->balanceLabel->setText(QString::number(manager.getBalance(),       'f', 2) + " " + cur);
 }

@@ -1,122 +1,203 @@
-#include "JsonTools.h"
+#include "jsontools.h"
 
-#include <sstream>
+#include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonParseError>
+#include <QByteArray>
 #include <QString>
 #include <QDate>
 
 namespace JsonTools {
 
-std::string escape(const std::string& text)
+static QJsonObject transactionToObject(const Transaction& t)
 {
-    std::string result;
-    for (char c : text) {
-        if (c == '"' || c == '\\') {
-            result += '\\';
-        }
-        result += c;
+    QJsonObject obj;
+
+    obj["amount"] = t.getAmount();
+    obj["type"] = t.getType();
+    obj["category"] = t.getCategory();
+    obj["date"] = t.getDate().toString("yyyy-MM-dd");
+
+    return obj;
+}
+
+static bool objectToTransaction(const QJsonObject& obj, Transaction& out)
+{
+    if (!obj.contains("amount") || !obj["amount"].isDouble()) {
+        return false;
     }
-    return result;
+
+    if (!obj.contains("type") || !obj["type"].isString()) {
+        return false;
+    }
+
+    if (!obj.contains("category") || !obj["category"].isString()) {
+        return false;
+    }
+
+    if (!obj.contains("date") || !obj["date"].isString()) {
+        return false;
+    }
+
+    double amount = obj["amount"].toDouble();
+    QString type = obj["type"].toString();
+    QString category = obj["category"].toString();
+    QDate date = QDate::fromString(obj["date"].toString(), "yyyy-MM-dd");
+
+    if (!date.isValid()) {
+        return false;
+    }
+
+    out = Transaction(amount, type, category, date, "EGP");
+    return true;
 }
 
 std::string toJson(const Transaction& t)
 {
-    std::ostringstream out;
-    out << "{"
-        << "\"amount\":" << t.getAmount() << ","
-        << "\"type\":\"" << escape(t.getType().toStdString()) << "\","
-        << "\"category\":\"" << escape(t.getCategory().toStdString()) << "\","
-        << "\"date\":\"" << escape(t.getDate().toString("yyyy-MM-dd").toStdString()) << "\""
-        << "}";
-    return out.str();
-}
+    QJsonObject obj = transactionToObject(t);
+    QJsonDocument doc(obj);
 
-std::string addTransactionMsg(const Transaction& t)
-{
-    return std::string("{\"action\":\"add_transaction\",\"transaction\":")
-    + toJson(t) + "}\n";
-}
-
-std::string getAllMsg()
-{
-    return "{\"action\":\"get_all\"}\n";
-}
-
-std::string okResponse(const std::string& message)
-{
-    return std::string("{\"status\":\"ok\",\"message\":\"") + escape(message) + "\"}\n";
-}
-
-std::string errorResponse(const std::string& message)
-{
-    return std::string("{\"status\":\"error\",\"message\":\"") + escape(message) + "\"}\n";
-}
-
-std::string transactionsResponse(const std::vector<Transaction>& transactions)
-{
-    std::ostringstream out;
-    out << "{\"status\":\"ok\",\"transactions\":[";
-    for (size_t i = 0; i < transactions.size(); ++i) {
-        out << toJson(transactions[i]);
-        if (i + 1 < transactions.size()) {
-            out << ",";
-        }
-    }
-    out << "]}\n";
-    return out.str();
-}
-
-static bool extractString(const std::string& json, const std::string& key, std::string& value)
-{
-    std::string pattern = "\"" + key + "\":\"";
-    size_t start = json.find(pattern);
-    if (start == std::string::npos) return false;
-
-    start += pattern.size();
-    size_t end = json.find("\"", start);
-    if (end == std::string::npos) return false;
-
-    value = json.substr(start, end - start);
-    return true;
-}
-
-static bool extractDouble(const std::string& json, const std::string& key, double& value)
-{
-    std::string pattern = "\"" + key + "\":";
-    size_t start = json.find(pattern);
-    if (start == std::string::npos) return false;
-
-    start += pattern.size();
-    size_t end = json.find_first_of(",}", start);
-    if (end == std::string::npos) return false;
-
-    try {
-        value = std::stod(json.substr(start, end - start));
-        return true;
-    } catch (...) {
-        return false;
-    }
+    return doc.toJson(QJsonDocument::Compact).toStdString();
 }
 
 bool fromJson(const std::string& json, Transaction& out)
 {
-    double amount;
-    std::string type;
-    std::string category;
-    std::string date;
+    QByteArray data = QByteArray::fromStdString(json);
 
-    if (!extractDouble(json, "amount", amount)) return false;
-    if (!extractString(json, "type", type)) return false;
-    if (!extractString(json, "category", category)) return false;
-    if (!extractString(json, "date", date)) return false;
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &error);
 
-    out = Transaction(
-        amount,
-        QString::fromStdString(type),
-        QString::fromStdString(category),
-        QDate::fromString(QString::fromStdString(date), "yyyy-MM-dd")
-        );
+    if (error.error != QJsonParseError::NoError) {
+        return false;
+    }
 
-    return out.getDate().isValid();
+    if (!doc.isObject()) {
+        return false;
+    }
+
+    return objectToTransaction(doc.object(), out);
+}
+
+std::string addTransactionMsg(const Transaction& t)
+{
+    QJsonObject root;
+
+    root["action"] = "add_transaction";
+    root["transaction"] = transactionToObject(t);
+
+    QJsonDocument doc(root);
+    return doc.toJson(QJsonDocument::Compact).toStdString() + "\n";
+}
+
+std::string getAllMsg()
+{
+    QJsonObject root;
+
+    root["action"] = "get_all";
+
+    QJsonDocument doc(root);
+    return doc.toJson(QJsonDocument::Compact).toStdString() + "\n";
+}
+
+std::string okResponse(const std::string& message)
+{
+    QJsonObject root;
+
+    root["status"] = "ok";
+    root["message"] = QString::fromStdString(message);
+
+    QJsonDocument doc(root);
+    return doc.toJson(QJsonDocument::Compact).toStdString() + "\n";
+}
+
+std::string errorResponse(const std::string& message)
+{
+    QJsonObject root;
+
+    root["status"] = "error";
+    root["message"] = QString::fromStdString(message);
+
+    QJsonDocument doc(root);
+    return doc.toJson(QJsonDocument::Compact).toStdString() + "\n";
+}
+
+std::string transactionsResponse(const std::vector<Transaction>& transactions)
+{
+    QJsonObject root;
+
+    root["status"] = "ok";
+
+    QJsonArray array;
+
+    for (const Transaction& t : transactions) {
+        array.append(transactionToObject(t));
+    }
+
+    root["transactions"] = array;
+
+    QJsonDocument doc(root);
+    return doc.toJson(QJsonDocument::Compact).toStdString() + "\n";
+}
+
+bool isValidJson(const std::string& json)
+{
+    QByteArray data = QByteArray::fromStdString(json);
+
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &error);
+
+    return error.error == QJsonParseError::NoError && !doc.isNull();
+}
+
+std::string extractAction(const std::string& json)
+{
+    QByteArray data = QByteArray::fromStdString(json);
+
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &error);
+
+    if (error.error != QJsonParseError::NoError) {
+        return "";
+    }
+
+    if (!doc.isObject()) {
+        return "";
+    }
+
+    QJsonObject root = doc.object();
+
+    if (!root.contains("action") || !root["action"].isString()) {
+        return "";
+    }
+
+    return root["action"].toString().toStdString();
+}
+
+bool extractTransaction(const std::string& json, Transaction& out)
+{
+    QByteArray data = QByteArray::fromStdString(json);
+
+    QJsonParseError error;
+    QJsonDocument doc = QJsonDocument::fromJson(data, &error);
+
+    if (error.error != QJsonParseError::NoError) {
+        return false;
+    }
+
+    if (!doc.isObject()) {
+        return false;
+    }
+
+    QJsonObject root = doc.object();
+
+    if (!root.contains("transaction") || !root["transaction"].isObject()) {
+        return false;
+    }
+
+    QJsonObject transactionObj = root["transaction"].toObject();
+
+    return objectToTransaction(transactionObj, out);
 }
 
 }

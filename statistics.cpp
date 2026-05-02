@@ -1,13 +1,12 @@
 #include "statistics.h"
 #include "ui_statistics.h"
-
-#include <QMap>
-#include <QDate>
-#include <QCloseEvent>
-
 #include "budgetmanager.h"
 #include "transaction.h"
 #include "addtransaction.h"
+#include <QDate>
+#include <QMap>
+#include <QLabel>
+#include <QLineEdit>
 
 statistics::statistics(QWidget *parent)
     : QWidget(parent)
@@ -15,15 +14,24 @@ statistics::statistics(QWidget *parent)
 {
     ui->setupUi(this);
 
-    connect(ui->budgetFood, &QLineEdit::textChanged, this, &statistics::updateStats);
-    connect(ui->budgetRent, &QLineEdit::textChanged, this, &statistics::updateStats);
-    connect(ui->budgetTransportation, &QLineEdit::textChanged, this, &statistics::updateStats);
-    connect(ui->budgetOther, &QLineEdit::textChanged, this, &statistics::updateStats);
-    connect(ui->budgetHealth, &QLineEdit::textChanged, this, &statistics::updateStats);
-    connect(ui->budgetGroceries, &QLineEdit::textChanged, this, &statistics::updateStats);
-    connect(ui->budgetEntertainment, &QLineEdit::textChanged, this, &statistics::updateStats);
-    connect(ui->budgetEducation, &QLineEdit::textChanged, this, &statistics::updateStats);
-    connect(ui->budgetUtilities, &QLineEdit::textChanged, this, &statistics::updateStats);
+    connect(ui->back1Button, &QPushButton::clicked,
+            this, &statistics::on_back1Button_clicked);
+
+    // FIX: each budget input change triggers a full stats refresh
+    const auto budgetInputs = {
+        ui->budgetUtilities,    ui->budgetGroceries,
+        ui->budgetRent,         ui->budgetFood,
+        ui->budgetEntertainment,ui->budgetEducation,
+        ui->budgetHealth,       ui->budgetTransportation,
+        ui->budgetOther
+    };
+    for (QLineEdit* input : budgetInputs)
+        connect(input, &QLineEdit::textChanged, this, &statistics::updateStats);
+}
+
+statistics::~statistics()
+{
+    delete ui;
 }
 
 void statistics::setManager(BudgetManager* m)
@@ -32,130 +40,124 @@ void statistics::setManager(BudgetManager* m)
     updateStats();
 }
 
-void statistics::updateStats()
-{
-    if (!manager) return;
-
-    double monthIncome = 0;
-    double monthExpenses = 0;
-    QDate now = QDate::currentDate();
-    QMap<QString, double> categoryTotals;
-
-    for (const Transaction& t : manager->getAllTransactions())
-    {
-        QString type = t.getType().trimmed().toLower();
-        double amount = t.getAmount();
-        QString category = t.getCategory().trimmed();
-
-        if (category.compare("Transport", Qt::CaseInsensitive) == 0) {
-            category = "Transportation";
-        }
-
-        if (t.getDate().month() == now.month() && t.getDate().year() == now.year())
-        {
-            if (type == "income") {
-                monthIncome += amount;
-            } else if (type == "expense") {
-                monthExpenses += amount;
-            }
-        }
-
-        if (type == "expense")
-        {
-            categoryTotals[category] += amount;
-        }
-    }
-
-    int totalTransactions = static_cast<int>(manager->getAllTransactions().size());
-    double monthBalance = monthIncome - monthExpenses;
-
-    QString highestCategory = "None";
-    double highestValue = 0;
-
-    for (auto it = categoryTotals.begin(); it != categoryTotals.end(); ++it)
-    {
-        if (it.value() > highestValue)
-        {
-            highestValue = it.value();
-            highestCategory = it.key();
-        }
-    }
-
-    ui->monthIncome->setText(QString::number(monthIncome));
-    ui->monthExpenses->setText(QString::number(monthExpenses));
-    ui->monthSaving->setText(QString::number(monthBalance));
-    ui->totalTransactions->setText(QString::number(totalTransactions));
-    ui->Highestspending->setText(highestCategory);
-
-    ui->Education->setText(QString::number(categoryTotals["Education"]));
-    ui->Entertainment->setText(QString::number(categoryTotals["Entertainment"]));
-    ui->Food->setText(QString::number(categoryTotals["Food"]));
-    ui->Groceries->setText(QString::number(categoryTotals["Groceries"]));
-    ui->Health->setText(QString::number(categoryTotals["Health"]));
-    ui->Other->setText(QString::number(categoryTotals["Other"]));
-    ui->Rent->setText(QString::number(categoryTotals["Rent"]));
-    ui->Transportation->setText(QString::number(categoryTotals["Transportation"]));
-    ui->Utilities->setText(QString::number(categoryTotals["Utilities"]));
-
-    double foodBudget = ui->budgetFood->text().toDouble();
-    manager->setBudget("Food", foodBudget);
-    ui->remainingFood->setText(QString::number(foodBudget - categoryTotals["Food"]));
-
-    double rentBudget = ui->budgetRent->text().toDouble();
-    manager->setBudget("Rent", rentBudget);
-    ui->remainingRent->setText(QString::number(rentBudget - categoryTotals["Rent"]));
-
-    double groceriesBudget = ui->budgetGroceries->text().toDouble();
-    manager->setBudget("Groceries", groceriesBudget);
-    ui->remainingGroceries->setText(QString::number(groceriesBudget - categoryTotals["Groceries"]));
-
-    double transportationBudget = ui->budgetTransportation->text().toDouble();
-    manager->setBudget("Transportation", transportationBudget);
-    ui->remainingTransportation->setText(QString::number(transportationBudget - categoryTotals["Transportation"]));
-
-    double utilitiesBudget = ui->budgetUtilities->text().toDouble();
-    manager->setBudget("Utilities", utilitiesBudget);
-    ui->remainingUtilities->setText(QString::number(utilitiesBudget - categoryTotals["Utilities"]));
-
-    double otherBudget = ui->budgetOther->text().toDouble();
-    manager->setBudget("Other", otherBudget);
-    ui->remainingOther->setText(QString::number(otherBudget - categoryTotals["Other"]));
-
-    double entertainmentBudget = ui->budgetEntertainment->text().toDouble();
-    manager->setBudget("Entertainment", entertainmentBudget);
-    ui->remainingEntertainment->setText(QString::number(entertainmentBudget - categoryTotals["Entertainment"]));
-
-    double healthBudget = ui->budgetHealth->text().toDouble();
-    manager->setBudget("Health", healthBudget);
-    ui->remainingHealth->setText(QString::number(healthBudget - categoryTotals["Health"]));
-
-    double educationBudget = ui->budgetEducation->text().toDouble();
-    manager->setBudget("Education", educationBudget);
-    ui->remainingEducation->setText(QString::number(educationBudget - categoryTotals["Education"]));
-}
-
 void statistics::setMainWindow(Addtransaction* w)
 {
     mainWindow = w;
 }
 
-void statistics::on_back1Button_clicked()
+// ---------------------------------------------------------------------------
+// Helper — update one category row
+// ---------------------------------------------------------------------------
+void statistics::updateCategoryRow(const QString& category,
+                                   const QMap<QString, double>& totals,
+                                   QLabel*    spentLabel,
+                                   QLineEdit* budgetInput,
+                                   QLabel*    remainingLabel,
+                                   const QString& currency)
 {
-    this->hide();
+    double spent = totals.value(category, 0.0);
+    spentLabel->setText(QString::number(spent, 'f', 2) + " " + currency);
+
+    // Read the budget the user typed; push it into the manager
+    bool   ok     = false;
+    double budget = budgetInput->text().toDouble(&ok);
+    if (ok && budget > 0)
+        manager->setBudget(category, budget);
+
+    double remaining = manager->budgetDifference(category);
+    remainingLabel->setText(QString::number(remaining, 'f', 2) + " " + currency);
+
+    // FIX: colour the remaining label red when over-budget
+    if (remaining < 0)
+        remainingLabel->setStyleSheet("color: red;");
+    else
+        remainingLabel->setStyleSheet("color: green;");
 }
 
-statistics::~statistics()
+// ---------------------------------------------------------------------------
+// Main stats refresh
+// ---------------------------------------------------------------------------
+void statistics::updateStats()
 {
-    delete ui;
-}
+    if (!manager) return;
 
-void statistics::closeEvent(QCloseEvent *event)
-{
-    emit windowClosed();
+    QDate now = QDate::currentDate();
+    QString currency = manager->getDisplayCurrency();
 
-    if (mainWindow) {
-        mainWindow->show();
+    // FIX: separate maps for category totals (expenses only) vs all-time totals
+    QMap<QString, double> categoryExpenses;   // expenses only, all time
+    double monthIncome   = 0.0;
+    double monthExpenses = 0.0;
+    int    totalCount    = 0;
+
+    for (const Transaction& t : manager->getAllTransactions())
+    {
+        QString type  = t.getType().trimmed().toLower();
+        double  amount = manager->convertToDisplay(t.getAmount(), t.getCurrency());
+        ++totalCount;
+
+        // Monthly summary
+        if (t.getDate().month() == now.month() &&
+            t.getDate().year()  == now.year())
+        {
+            if (type == "income")  monthIncome   += amount;
+            if (type == "expense") monthExpenses += amount;
+        }
+
+        // FIX: only count EXPENSES for the per-category spending totals
+        if (type == "expense")
+            categoryExpenses[t.getCategory()] += amount;
     }
 
-    QWidget::closeEvent(event);
+    // ---- Monthly summary ----
+    ui->monthIncome  ->setText(QString::number(monthIncome,              'f', 2) + " " + currency);
+    ui->monthExpenses->setText(QString::number(monthExpenses,            'f', 2) + " " + currency);
+    ui->monthSaving  ->setText(QString::number(monthIncome - monthExpenses, 'f', 2) + " " + currency);
+
+    // FIX: update total transactions count
+    ui->totalTransactions->setText(QString::number(totalCount));
+
+    // FIX: find and display highest spending category
+    QString highestCat;
+    double  highestAmt = -1.0;
+    for (auto it = categoryExpenses.constBegin(); it != categoryExpenses.constEnd(); ++it)
+    {
+        if (it.value() > highestAmt)
+        {
+            highestAmt = it.value();
+            highestCat = it.key();
+        }
+    }
+    ui->Highestspending->setText(highestCat.isEmpty() ? "N/A" : highestCat);
+
+    // ---- Per-category rows (spent + remaining budget) ----
+    // FIX: all rows now properly show converted amounts and remaining budget
+    updateCategoryRow("Utilities",     categoryExpenses,
+                      ui->Utilities,     ui->budgetUtilities,     ui->remainingUtilities,     currency);
+    updateCategoryRow("Groceries",     categoryExpenses,
+                      ui->Groceries,     ui->budgetGroceries,     ui->remainingGroceries,     currency);
+    updateCategoryRow("Rent",          categoryExpenses,
+                      ui->Rent,          ui->budgetRent,          ui->remainingRent,          currency);
+    updateCategoryRow("Food",          categoryExpenses,
+                      ui->Food,          ui->budgetFood,          ui->remainingFood,          currency);
+    updateCategoryRow("Entertainment", categoryExpenses,
+                      ui->Entertainment, ui->budgetEntertainment, ui->remainingEntertainment, currency);
+    updateCategoryRow("Education",     categoryExpenses,
+                      ui->Education,     ui->budgetEducation,     ui->remainingEducation,     currency);
+    updateCategoryRow("Health",        categoryExpenses,
+                      ui->Health,        ui->budgetHealth,        ui->remainingHealth,        currency);
+    updateCategoryRow("Transportation",categoryExpenses,
+                      ui->Transportation,ui->budgetTransportation,ui->remainingTransportation,currency);
+    updateCategoryRow("Other",         categoryExpenses,
+                      ui->Other,         ui->budgetOther,         ui->remainingOther,         currency);
+}
+
+void statistics::on_back1Button_clicked()
+{
+    this->close();
+    if (mainWindow)
+    {
+        mainWindow->refreshLabels();
+        mainWindow->show();
+    }
 }

@@ -1,6 +1,6 @@
 #include <iostream>
 #include <boost/asio.hpp>
-#include "NetworkServer.h"
+#include "networkserver.h"
 
 int main()
 {

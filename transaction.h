@@ -5,19 +5,23 @@
 #include <QDate>
 
 class Transaction {
-private:
-    double amount;
-    QString type;
-    QString category;
-    QDate date;
-
 public:
-    Transaction(double amount, QString type, QString category, QDate date);
+    Transaction(double amount, QString type, QString category, QDate date, QString currency);
+
+    Transaction(double amount, QString type, QString category, QDate date)
+        : amount(amount), type(type), category(category), date(date), currency("EGP") {}
 
     double getAmount() const;
     QString getType() const;
     QString getCategory() const;
     QDate getDate() const;
+    QString getCurrency() const;
+private:
+    double amount;
+    QString type;
+    QString category;
+    QDate date;
+    QString currency;
 };
 
 #endif
