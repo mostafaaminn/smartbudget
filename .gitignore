@@ -1,4 +1,20 @@
+# Build folders
 build/
+build-*/
+*.app/
+
+# Qt Creator files
+.qtcreator/
+*.user
+*.autosave
+
+# CMake
+CMakeFiles/
+CMakeCache.txt
+cmake-build-*/
+
+# macOS
+.DS_Store
 *.o
 *.pro.user
 *.qmake.stash
