@@ -30,12 +30,11 @@ Addtransaction::Addtransaction(QWidget *parent)
 
     connect(networkClient, &NetworkClient::errorOccurred,
             this, [this](const QString& error) {
-                QMessageBox::warning(this, "Network Error", error);
+                Q_UNUSED(error);
             });
 
     connect(networkClient, &NetworkClient::messageSent,
             this, [this]() {
-                QMessageBox::information(this, "Network", "Transaction sent to server successfully.");
             });
 
     networkClient->connectToServer("127.0.0.1", 12345);

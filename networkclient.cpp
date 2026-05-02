@@ -105,7 +105,6 @@ void NetworkClient::sendMessage(const std::string& message)
 {
     boost::asio::post(ioContext, [this, message]() {
         if (!connected || !socket || !socket->is_open()) {
-            emit errorOccurred("Not connected to server.");
             emit statusChanged("Disconnected");
             return;
         }
