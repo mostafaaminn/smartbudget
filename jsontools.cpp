@@ -1,4 +1,4 @@
-#include "JsonTools.h"
+#include "jsontools.h"
 
 #include <sstream>
 #include <QString>
