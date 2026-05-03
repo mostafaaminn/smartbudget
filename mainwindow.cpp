@@ -43,14 +43,12 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->statisticsButton, &QPushButton::clicked,
             this, &MainWindow::showStatistics);
 
-    // Switch pages when requested from Transactions page
     connect(transactionWidget, &Addtransaction::historyRequested,
             this, &MainWindow::showHistory);
 
     connect(transactionWidget, &Addtransaction::statisticsRequested,
             this, &MainWindow::showStatistics);
 
-    // Keep dashboard synced
     connect(transactionWidget, &Addtransaction::totalsChanged,
             this, &MainWindow::updateDashboardTotals);
 

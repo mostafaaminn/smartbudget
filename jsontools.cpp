@@ -113,7 +113,8 @@ bool fromJson(const std::string& json, Transaction& out)
         amount,
         QString::fromStdString(type),
         QString::fromStdString(category),
-        QDate::fromString(QString::fromStdString(date), "yyyy-MM-dd")
+        QDate::fromString(QString::fromStdString(date), "yyyy-MM-dd"),
+        "USD"
         );
 
     return out.getDate().isValid();

@@ -26,7 +26,6 @@ public:
 
     BudgetManager* getManager();
 
-    // Called by child windows so the main labels stay in sync
     void refreshLabels();
 
 private slots:
@@ -34,7 +33,6 @@ private slots:
     void on_historyButton_clicked();
     void on_summaryButton_clicked();
 
-    // Updates the displayed currency and refreshes the manager labels
     void onDisplayCurrencyChanged(const QString& text);
 
 private:

@@ -17,7 +17,7 @@ TEST(BudgetManagerTest, StartsEmpty)
 TEST(BudgetManagerTest, AddIncomeTransactionUpdatesBalanceAndIncome)
 {
     BudgetManager manager;
-    Transaction t(500.0, "income", "salary", QDate(2026, 4, 12));
+    Transaction t(500.0, "income", "salary", QDate(2026, 4, 12), "USD");
 
     manager.addTransaction(t);
 
@@ -30,7 +30,7 @@ TEST(BudgetManagerTest, AddIncomeTransactionUpdatesBalanceAndIncome)
 TEST(BudgetManagerTest, AddExpenseTransactionUpdatesBalanceAndExpenses)
 {
     BudgetManager manager;
-    Transaction t(200.0, "expense", "food", QDate(2026, 4, 12));
+    Transaction t(200.0, "expense", "food", QDate(2026, 4, 12), "USD");
 
     manager.addTransaction(t);
 
@@ -44,9 +44,9 @@ TEST(BudgetManagerTest, MultipleTransactionsCalculateCorrectTotals)
 {
     BudgetManager manager;
 
-    manager.addTransaction(Transaction(1000.0, "income", "salary", QDate(2026, 4, 12)));
-    manager.addTransaction(Transaction(200.0, "expense", "food", QDate(2026, 4, 12)));
-    manager.addTransaction(Transaction(150.0, "expense", "transport", QDate(2026, 4, 12)));
+    manager.addTransaction(Transaction(1000.0, "income", "salary", QDate(2026, 4, 12), "USD"));
+    manager.addTransaction(Transaction(200.0, "expense", "food", QDate(2026, 4, 12), "USD"));
+    manager.addTransaction(Transaction(150.0, "expense", "transport", QDate(2026, 4, 12), "USD"));
 
     EXPECT_DOUBLE_EQ(manager.getBalance(), 650.0);
     EXPECT_DOUBLE_EQ(manager.getTotalIncome(), 1000.0);
@@ -58,8 +58,8 @@ TEST(BudgetManagerTest, RemoveTransactionDeletesCorrectItem)
 {
     BudgetManager manager;
 
-    manager.addTransaction(Transaction(1000.0, "income", "salary", QDate(2026, 4, 12)));
-    manager.addTransaction(Transaction(300.0, "expense", "food", QDate(2026, 4, 12)));
+    manager.addTransaction(Transaction(1000.0, "income", "salary", QDate(2026, 4, 12), "USD"));
+    manager.addTransaction(Transaction(300.0, "expense", "food", QDate(2026, 4, 12), "USD"));
 
     manager.removeTransaction(1);
 
@@ -73,7 +73,7 @@ TEST(BudgetManagerTest, RemoveInvalidIndexDoesNothing)
 {
     BudgetManager manager;
 
-    manager.addTransaction(Transaction(1000.0, "income", "salary", QDate(2026, 4, 12)));
+    manager.addTransaction(Transaction(1000.0, "income", "salary", QDate(2026, 4, 12), "USD"));
 
     manager.removeTransaction(-1);
     manager.removeTransaction(5);
@@ -86,9 +86,9 @@ TEST(BudgetManagerTest, HighestSpendingCategoryReturnsCorrectCategory)
 {
     BudgetManager manager;
 
-    manager.addTransaction(Transaction(1000.0, "income", "salary", QDate(2026, 4, 12)));
-    manager.addTransaction(Transaction(200.0, "expense", "food", QDate(2026, 4, 12)));
-    manager.addTransaction(Transaction(300.0, "expense", "transport", QDate(2026, 4, 12)));
+    manager.addTransaction(Transaction(1000.0, "income", "salary", QDate(2026, 4, 12), "USD"));
+    manager.addTransaction(Transaction(200.0, "expense", "food", QDate(2026, 4, 12), "USD"));
+    manager.addTransaction(Transaction(300.0, "expense", "transport", QDate(2026, 4, 12), "USD"));
 
     EXPECT_EQ(manager.getHighestSpendingCategory(), "transport");
 }
@@ -97,8 +97,8 @@ TEST(BudgetManagerTest, HighestSpendingCategoryIgnoresIncome)
 {
     BudgetManager manager;
 
-    manager.addTransaction(Transaction(5000.0, "income", "salary", QDate(2026, 4, 12)));
-    manager.addTransaction(Transaction(100.0, "expense", "food", QDate(2026, 4, 12)));
+    manager.addTransaction(Transaction(5000.0, "income", "salary", QDate(2026, 4, 12), "USD"));
+    manager.addTransaction(Transaction(100.0, "expense", "food", QDate(2026, 4, 12), "USD"));
 
     EXPECT_EQ(manager.getHighestSpendingCategory(), "food");
 }
@@ -107,8 +107,8 @@ TEST(BudgetManagerTest, HighestSpendingCategoryReturnsAllTiedCategories)
 {
     BudgetManager manager;
 
-    manager.addTransaction(Transaction(200.0, "expense", "food", QDate(2026, 4, 12)));
-    manager.addTransaction(Transaction(200.0, "expense", "transport", QDate(2026, 4, 12)));
+    manager.addTransaction(Transaction(200.0, "expense", "food", QDate(2026, 4, 12), "USD"));
+    manager.addTransaction(Transaction(200.0, "expense", "transport", QDate(2026, 4, 12), "USD"));
 
     QString result = manager.getHighestSpendingCategory();
 
@@ -119,7 +119,7 @@ TEST(BudgetManagerTest, HighestSpendingCategoryReturnsNoneWhenNoExpenses)
 {
     BudgetManager manager;
 
-    manager.addTransaction(Transaction(1000.0, "income", "salary", QDate(2026, 4, 12)));
+    manager.addTransaction(Transaction(1000.0, "income", "salary", QDate(2026, 4, 12), "USD"));
 
     EXPECT_EQ(manager.getHighestSpendingCategory(), "None");
 }
@@ -128,8 +128,8 @@ TEST(BudgetManagerTest, UpdateTransactionChangesStoredValues)
 {
     BudgetManager manager;
 
-    manager.addTransaction(Transaction(100.0, "expense", "Food", QDate(2026, 4, 12)));
-    manager.updateTransaction(0, 250.0, "income", "Salary");
+    manager.addTransaction(Transaction(100.0, "expense", "Food", QDate(2026, 4, 12), "USD"));
+    manager.updateTransaction(0, 250.0, "income", "Salary", "USD");
 
     auto transactions = manager.getAllTransactions();
 
@@ -153,9 +153,9 @@ TEST(BudgetManagerTest, RemoveFirstTransactionUpdatesTotalsCorrectly)
 {
     BudgetManager manager;
 
-    manager.addTransaction(Transaction(1000.0, "income", "salary", QDate(2026, 4, 12)));
-    manager.addTransaction(Transaction(200.0, "expense", "food", QDate(2026, 4, 12)));
-    manager.addTransaction(Transaction(300.0, "expense", "transport", QDate(2026, 4, 12)));
+    manager.addTransaction(Transaction(1000.0, "income", "salary", QDate(2026, 4, 12), "USD"));
+    manager.addTransaction(Transaction(200.0, "expense", "food", QDate(2026, 4, 12), "USD"));
+    manager.addTransaction(Transaction(300.0, "expense", "transport", QDate(2026, 4, 12), "USD"));
 
     manager.removeTransaction(0);
 

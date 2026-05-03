@@ -1,5 +1,5 @@
-#include "NetworkServer.h"
-#include "JsonTools.h"
+#include "networkserver.h"
+#include "jsontools.h"
 #include <iostream>
 
 using boost::asio::ip::tcp;
@@ -50,7 +50,7 @@ void NetworkServer::handleMessage(const std::string& message) {
         if (!txJson.empty() && txJson.back() == '}') {
         }
 
-        Transaction tx(0.0, "", "", QDate::currentDate());
+Transaction tx(0.0, "", "", QDate::currentDate(), "USD");
         if (!JsonTools::fromJson(txJson, tx)) {
             sendResponse(JsonTools::errorResponse("Invalid transaction JSON"));
             return;

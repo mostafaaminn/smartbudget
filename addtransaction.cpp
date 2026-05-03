@@ -5,7 +5,7 @@
 #include <QDate>
 #include <QStringList>
 
-#include "JsonTools.h"
+#include "jsontools.h"
 #include "transaction.h"
 #include "history.h"
 #include "statistics.h"
