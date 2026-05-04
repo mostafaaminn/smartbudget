@@ -1,6 +1,6 @@
 #ifndef BUDGETMANAGER_H
 #define BUDGETMANAGER_H
-
+#include "database.h"
 #include <vector>
 #include <QString>
 #include <QMap>
@@ -35,8 +35,9 @@ public:
     double convert(double amount, QString from, QString to) const;
     double convertToDisplay(double amount, const QString& fromCurrency) const;
     std::vector<Transaction> transactions;
+    void loadFromDatabase();
 private:
-
+    std::vector<int> dbIds;
     QMap<QString, double> categoryBudgets;
     QString displayCurrency = "USD";
 };

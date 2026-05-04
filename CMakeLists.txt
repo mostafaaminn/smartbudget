@@ -1,13 +1,13 @@
 cmake_minimum_required(VERSION 3.19)
 project(SmartBudget LANGUAGES CXX)
-
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include_directories("/opt/homebrew/include")
 link_directories("/opt/homebrew/lib")
 
-find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets)
+# ── CHANGED: added Sql and Network to the find_package call ──────────────────
+find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets Sql Network)
 
 set(GTEST_ROOT "/opt/homebrew/opt/googletest")
 include_directories("${GTEST_ROOT}/include")
@@ -38,16 +38,24 @@ qt_add_executable(SmartBudget
     statistics.ui
     JsonTools.h
     JsonTools.cpp
+    database.h
+    database.cpp
 )
 
 target_compile_definitions(SmartBudget PRIVATE BOOST_ERROR_CODE_HEADER_ONLY)
 
+# ── CHANGED: added Qt6::Sql and Qt6::Network (was Qt::Core / Qt::Widgets) ────
+# Note: must be Qt6:: not Qt:: to match the find_package above
 target_link_libraries(SmartBudget
     PRIVATE
-        Qt::Core
-        Qt::Widgets
+        Qt6::Core
+        Qt6::Widgets
+        Qt6::Sql
+        Qt6::Network
 )
 
+# ── CHANGED: SmartBudgetServer also needs Qt6::Sql now because it includes ───
+# budgetmanager.cpp which calls Database:: methods
 add_executable(SmartBudgetServer
     server.cpp
     NetworkServer.cpp
@@ -58,13 +66,17 @@ add_executable(SmartBudgetServer
     transaction.h
     budgetmanager.cpp
     budgetmanager.h
+    database.cpp
+    database.h
 )
 
 target_compile_definitions(SmartBudgetServer PRIVATE BOOST_ERROR_CODE_HEADER_ONLY)
 
+# ── CHANGED: added Qt6::Sql (budgetmanager now depends on it) ─────────────────
 target_link_libraries(SmartBudgetServer
     PRIVATE
-        Qt::Core
+        Qt6::Core
+        Qt6::Sql
 )
 
 enable_testing()
@@ -75,11 +87,15 @@ add_executable(SmartBudgetTests
     budgetmanager.h
     transaction.cpp
     transaction.h
+    database.cpp
+    database.h
 )
 
+# ── CHANGED: added Qt6::Sql (budgetmanager now depends on it) ─────────────────
 target_link_libraries(SmartBudgetTests
     PRIVATE
-        Qt::Core
+        Qt6::Core
+        Qt6::Sql
         gtest
         gtest_main
 )
