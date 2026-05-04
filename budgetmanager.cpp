@@ -185,3 +185,76 @@ QString BudgetManager::getDisplayCurrency() const
 {
     return displayCurrency;
 }
+double BudgetManager::compareMonth(QDate month1, QDate month2) const
+{
+    double total1 = 0;
+    double total2 = 0;
+
+    for (const Transaction& t : transactions)
+    {
+        if (t.getType().trimmed().toLower() != "expense")
+            continue;
+
+        double amount = convertToDisplay(t.getAmount(), t.getCurrency());
+
+        if (t.getDate().month() == month1.month() &&
+            t.getDate().year() == month1.year())
+        {
+            total1 += amount;
+        }
+
+        if (t.getDate().month() == month2.month() &&
+            t.getDate().year() == month2.year())
+        {
+            total2 += amount;
+        }
+    }
+
+    return total1 - total2;
+}
+void BudgetManager::applyRecurringTransactions(QDate currentDate)
+{
+    std::vector<Transaction> newTransactions;
+
+    for (const Transaction& t : transactions)
+    {
+        if (!t.isRecurring())
+            continue;
+
+        if (t.getDate().day() != currentDate.day())
+            continue;
+
+        bool alreadyExistsToday = false;
+
+        for (const Transaction& existing : transactions)
+        {
+            if (existing.getDate() == currentDate &&
+                existing.getCategory() == t.getCategory() &&
+                existing.getType() == t.getType() &&
+                existing.getAmount() == t.getAmount())
+            {
+                alreadyExistsToday = true;
+                break;
+            }
+        }
+
+        if (!alreadyExistsToday)
+        {
+            newTransactions.push_back(
+                Transaction(
+                    t.getAmount(),
+                    t.getType(),
+                    t.getCategory(),
+                    currentDate,
+                    t.getCurrency(),
+                    true
+                    )
+                );
+        }
+    }
+
+    for (const Transaction& t : newTransactions)
+    {
+        transactions.push_back(t);
+    }
+}

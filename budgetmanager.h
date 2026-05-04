@@ -28,15 +28,15 @@ public:
     double getBudget(const QString& category) const;
     bool isOverBudget(const QString& category) const;
     double budgetDifference(const QString& category) const;
-
+    double compareMonth(QDate month1, QDate month2) const;
     void setDisplayCurrency(const QString& currency);
     QString getDisplayCurrency() const;
-
+    void applyRecurringTransactions(QDate currentDate);
     double convert(double amount, QString from, QString to) const;
     double convertToDisplay(double amount, const QString& fromCurrency) const;
-
-private:
     std::vector<Transaction> transactions;
+private:
+
     QMap<QString, double> categoryBudgets;
     QString displayCurrency = "USD";
 };
