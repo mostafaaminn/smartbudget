@@ -1,6 +1,6 @@
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-
 #include <QVBoxLayout>
 
 MainWindow::MainWindow(QWidget *parent)
@@ -11,7 +11,6 @@ MainWindow::MainWindow(QWidget *parent)
     , statisticsWidget(new statistics(this))
 {
     ui->setupUi(this);
-
     setWindowTitle("SmartBudget");
 
     ui->transactionsScrollArea->setWidget(transactionWidget);
@@ -27,34 +26,36 @@ MainWindow::MainWindow(QWidget *parent)
 
     historyWidget->setManager(transactionWidget->getManager());
     historyWidget->setMainWindow(transactionWidget);
-
     statisticsWidget->setManager(transactionWidget->getManager());
     statisticsWidget->setMainWindow(transactionWidget);
 
     connect(ui->dashboardButton, &QPushButton::clicked,
             this, &MainWindow::showDashboard);
-
     connect(ui->transactionsButton, &QPushButton::clicked,
             this, &MainWindow::showTransactions);
-
     connect(ui->historyButton, &QPushButton::clicked,
             this, &MainWindow::showHistory);
-
     connect(ui->statisticsButton, &QPushButton::clicked,
             this, &MainWindow::showStatistics);
 
     connect(transactionWidget, &Addtransaction::historyRequested,
             this, &MainWindow::showHistory);
-
     connect(transactionWidget, &Addtransaction::statisticsRequested,
             this, &MainWindow::showStatistics);
-
     connect(transactionWidget, &Addtransaction::totalsChanged,
             this, &MainWindow::updateDashboardTotals);
 
     ui->stackedWidget->setCurrentWidget(ui->dashboardPage);
 
-    updateDashboardTotals(0, 0, 0, 0, "None");
+
+    BudgetManager* mgr = transactionWidget->getManager();
+    updateDashboardTotals(
+        mgr->getBalance(),
+        mgr->getTotalIncome(),
+        mgr->getTotalExpenses(),
+        mgr->getTransactionCount(),
+        mgr->getHighestSpendingCategory()
+        );
 }
 
 MainWindow::~MainWindow()
@@ -64,6 +65,15 @@ MainWindow::~MainWindow()
 
 void MainWindow::showDashboard()
 {
+
+    BudgetManager* mgr = transactionWidget->getManager();
+    updateDashboardTotals(
+        mgr->getBalance(),
+        mgr->getTotalIncome(),
+        mgr->getTotalExpenses(),
+        mgr->getTransactionCount(),
+        mgr->getHighestSpendingCategory()
+        );
     ui->stackedWidget->setCurrentWidget(ui->dashboardPage);
 }
 
@@ -90,7 +100,9 @@ void MainWindow::updateDashboardTotals(double balance, double income, double exp
     Q_UNUSED(count);
     Q_UNUSED(highestCategory);
 
-    ui->dashboardBalanceLabel->setText(QString::number(balance));
-    ui->dashboardIncomeLabel->setText(QString::number(income));
-    ui->dashboardExpensesLabel->setText(QString::number(expenses));
+
+    QString cur = transactionWidget->getManager()->getDisplayCurrency();
+    ui->dashboardBalanceLabel->setText( QString::number(balance,  'f', 2) + " " + cur);
+    ui->dashboardIncomeLabel->setText(  QString::number(income,   'f', 2) + " " + cur);
+    ui->dashboardExpensesLabel->setText(QString::number(expenses, 'f', 2) + " " + cur);
 }
