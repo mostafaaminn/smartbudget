@@ -6,7 +6,6 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 include_directories("/opt/homebrew/include")
 link_directories("/opt/homebrew/lib")
 
-# ── CHANGED: added Sql and Network to the find_package call ──────────────────
 find_package(Qt6 6.5 REQUIRED COMPONENTS Core Widgets Sql Network)
 
 set(GTEST_ROOT "/opt/homebrew/opt/googletest")
@@ -40,6 +39,10 @@ qt_add_executable(SmartBudget
     JsonTools.cpp
     database.h
     database.cpp
+    Inetworkclient.h
+    Budgetcontroller.h
+    Budgetcontroller.cpp
+
 )
 
 target_compile_definitions(SmartBudget PRIVATE BOOST_ERROR_CODE_HEADER_ONLY)
@@ -83,21 +86,30 @@ enable_testing()
 
 add_executable(SmartBudgetTests
     test_budgetmanager.cpp
+    mock_networkclient.h
+    Inetworkclient.h
+    Budgetcontroller.h
+    Budgetcontroller.cpp
     budgetmanager.cpp
     budgetmanager.h
     transaction.cpp
     transaction.h
     database.cpp
     database.h
+    JsonTools.cpp
+    JsonTools.h
 )
 
-# ── CHANGED: added Qt6::Sql (budgetmanager now depends on it) ─────────────────
+target_compile_definitions(SmartBudgetTests PRIVATE BOOST_ERROR_CODE_HEADER_ONLY)
+
 target_link_libraries(SmartBudgetTests
     PRIVATE
         Qt6::Core
         Qt6::Sql
         gtest
         gtest_main
+        gmock
+        gmock_main
 )
 
 add_test(NAME SmartBudgetTests COMMAND SmartBudgetTests)

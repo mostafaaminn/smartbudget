@@ -15,7 +15,8 @@
 Addtransaction::Addtransaction(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::Addtransaction)
-    , networkClient(new NetworkClient(this))
+    , rawClient(new NetworkClient(this))
+    , controller(rawClient)
 {
     ui->setupUi(this);
     setWindowTitle("SmartBudget - Add Transaction");
@@ -42,16 +43,16 @@ Addtransaction::Addtransaction(QWidget *parent)
     connect(ui->comboDisplayCurrency, &QComboBox::currentTextChanged,
             this, &Addtransaction::onDisplayCurrencyChanged);
 
-    connect(networkClient, &NetworkClient::statusChanged,
+    connect(rawClient, &NetworkClient::statusChanged,
             ui->networkStatusLabel, &QLabel::setText);
 
-    connect(networkClient, &NetworkClient::errorOccurred,
+    connect(rawClient, &NetworkClient::errorOccurred,
             this, [this](const QString& error) { Q_UNUSED(error); });
 
-    connect(networkClient, &NetworkClient::messageSent,
+    connect(rawClient, &NetworkClient::messageSent,
             this, [this]() {});
 
-    networkClient->connectToServer("127.0.0.1", 12345);
+    rawClient->connectToServer("127.0.0.1", 12345);
 
     refreshLabels();
 }
@@ -113,7 +114,7 @@ void Addtransaction::onAddClicked()
         manager.getHighestSpendingCategory()
         );
 
-    networkClient->sendMessage(JsonTools::addTransactionMsg(newTransaction));
+controller.addTransactionToServer(newTransaction);
     QMessageBox::information(this, "Success", "Transaction added successfully.");
     clearInputs();
 }

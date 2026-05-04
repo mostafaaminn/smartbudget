@@ -50,10 +50,9 @@ void BudgetManager::removeTransaction(int index)
     if (index < 0 || index >= static_cast<int>(transactions.size())) {
         return;
     }
-
-    // ← NEW: remove from SQLite first
-    Database::deleteTransaction(dbIds[index]);
-
+    if (dbIds[index] > 0) {
+        Database::deleteTransaction(dbIds[index]);
+    }
     transactions.erase(transactions.begin() + index);
     dbIds.erase(dbIds.begin() + index);
 }
@@ -67,11 +66,12 @@ void BudgetManager::updateTransaction(int index, double amount,
     }
 
 
-    Database::updateTransaction(dbIds[index], amount, type, category, currency);
+    if (dbIds[index] > 0) {
+        Database::updateTransaction(dbIds[index], amount, type, category, currency);
+    }
 
     transactions[index] = Transaction(amount, type, category,
-                                      QDate::currentDate(), currency);
-
+                                      transactions[index].getDate(), currency);
 }
 
 std::vector<Transaction> BudgetManager::getAllTransactions() const

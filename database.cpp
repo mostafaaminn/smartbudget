@@ -1,16 +1,22 @@
+
 #include "database.h"
 
 bool Database::init()
 {
+    if (!QSqlDatabase::contains(QSqlDatabase::defaultConnection)) {
+        QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
+        db.setDatabaseName("smartbudget.db");
 
-    QSqlDatabase db = QSqlDatabase::addDatabase("QSQLITE");
-
-
-    db.setDatabaseName("smartbudget.db");
-
-    if (!db.open()) {
-        qWarning() << "Database::init – could not open:" << db.lastError().text();
-        return false;
+        if (!db.open()) {
+            qWarning() << "Database::init – could not open:" << db.lastError().text();
+            return false;
+        }
+    } else {
+        QSqlDatabase db = QSqlDatabase::database();
+        if (!db.isOpen() && !db.open()) {
+            qWarning() << "Database::init – could not reopen:" << db.lastError().text();
+            return false;
+        }
     }
 
     return createTables();
@@ -38,7 +44,6 @@ bool Database::createTables()
         return false;
     }
 
-
     ok = q.exec(
         "CREATE TABLE IF NOT EXISTS budgets ("
         "  category TEXT PRIMARY KEY, "
@@ -53,7 +58,6 @@ bool Database::createTables()
 
     return true;
 }
-
 
 
 int Database::insertTransaction(const Transaction& t)
@@ -75,7 +79,7 @@ int Database::insertTransaction(const Transaction& t)
         return -1;
     }
 
-
+    // Returns the auto-generated id so BudgetManager can track it.
     return q.lastInsertId().toInt();
 }
 
@@ -138,11 +142,9 @@ bool Database::updateTransaction(int dbId, double amount,
 }
 
 
-
 bool Database::saveBudget(const QString& category, double amount)
 {
     QSqlQuery q;
-
     q.prepare(
         "INSERT OR REPLACE INTO budgets (category, amount) "
         "VALUES (:category, :amount);"

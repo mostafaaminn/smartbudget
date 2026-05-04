@@ -50,7 +50,7 @@ void NetworkServer::handleMessage(const std::string& message) {
         if (!txJson.empty() && txJson.back() == '}') {
         }
 
-Transaction tx(0.0, "", "", QDate::currentDate(), "USD");
+        Transaction tx(0.0, "", "", QDate::currentDate(), "USD");
         if (!JsonTools::fromJson(txJson, tx)) {
             sendResponse(JsonTools::errorResponse("Invalid transaction JSON"));
             return;
