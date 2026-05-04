@@ -44,7 +44,6 @@ protected:
 
 private slots:
     void on_deleteButton_clicked();
-    void on_backButton_clicked();
     void on_editButton_clicked();
 
 private:

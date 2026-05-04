@@ -32,12 +32,6 @@ Addtransaction::Addtransaction(QWidget *parent)
     connect(ui->pushButton, &QPushButton::clicked,
             this, &Addtransaction::onAddClicked);
 
-    connect(ui->historyButton, &QPushButton::clicked,
-            this, &Addtransaction::on_historyButton_clicked);
-
-    connect(ui->Summary, &QPushButton::clicked,
-            this, &Addtransaction::on_summaryButton_clicked);
-
     connect(ui->comboDisplayCurrency, &QComboBox::currentTextChanged,
             this, &Addtransaction::onDisplayCurrencyChanged);
 
@@ -164,31 +158,6 @@ BudgetManager* Addtransaction::getManager()
     return &manager;
 }
 
-void Addtransaction::on_historyButton_clicked()
-{
-    if (!historyWindow) {
-        historyWindow = new History();
-        historyWindow->setManager(&manager);
-        historyWindow->setMainWindow(this);
-    }
-
-    historyWindow->refreshTable();
-    historyWindow->show();
-    this->hide();
-}
-
-void Addtransaction::on_summaryButton_clicked()
-{
-    if (!statsWindow) {
-        statsWindow = new statistics();
-        statsWindow->setManager(&manager);
-        statsWindow->setMainWindow(this);
-    }
-
-    statsWindow->updateStats();
-    statsWindow->show();
-    this->hide();
-}
 
 void Addtransaction::onDisplayCurrencyChanged(const QString& text)
 {

@@ -19,8 +19,6 @@ statistics::statistics(QWidget *parent)
 {
     ui->setupUi(this);
 
-    connect(ui->back1Button, &QPushButton::clicked,
-            this, &statistics::on_back1Button_clicked);
 
     const auto budgetInputs = {
         ui->budgetFood,
@@ -273,11 +271,6 @@ void statistics::addBillReminder()
                              QString("Reminder for \"%1\" added on day %2 of each month.").arg(name).arg(day));
 }
 
-void statistics::on_back1Button_clicked()
-{
-    this->hide();
-    if (mainWindow) { mainWindow->refreshLabels(); mainWindow->show(); }
-}
 
 void statistics::closeEvent(QCloseEvent *event)
 {

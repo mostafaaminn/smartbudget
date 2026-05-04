@@ -32,8 +32,6 @@ signals:
 
 private slots:
     void onAddClicked();
-    void on_historyButton_clicked();
-    void on_summaryButton_clicked();
     void onDisplayCurrencyChanged(const QString& text);
 
 private:

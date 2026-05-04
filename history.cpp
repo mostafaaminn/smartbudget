@@ -17,8 +17,6 @@ History::History(QWidget *parent)
     connect(ui->deleteButton, &QPushButton::clicked,
             this, &History::on_deleteButton_clicked);
 
-    connect(ui->backButton, &QPushButton::clicked,
-            this, &History::on_backButton_clicked);
 
     connect(ui->editButton, &QPushButton::clicked,
             this, &History::on_editButton_clicked);
@@ -180,14 +178,7 @@ void History::showFilterDialog()
     }
 }
 
-void History::on_backButton_clicked()
-{
-    this->hide();
-    if (mainWindow) {
-        mainWindow->refreshLabels();
-        mainWindow->show();
-    }
-}
+
 
 void History::on_deleteButton_clicked()
 {
