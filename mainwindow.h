@@ -20,6 +20,9 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+    // Exposed so main.cpp can access the manager for startup tasks
+    BudgetManager* getManager();
+
 private slots:
     void showDashboard();
     void showTransactions();
@@ -31,8 +34,8 @@ private slots:
 private:
     Ui::MainWindow *ui;
     Addtransaction *transactionWidget;
-    History *historyWidget;
-    statistics *statisticsWidget;
+    History        *historyWidget;
+    statistics     *statisticsWidget;
 };
 
-#endif
+#endif // MAINWINDOW_H

@@ -1,16 +1,16 @@
-
 #include "addtransaction.h"
 #include "ui_addtransaction.h"
 
 #include <QMessageBox>
 #include <QDate>
 #include <QStringList>
+#include <QInputDialog>
 
 #include "jsontools.h"
 #include "transaction.h"
 #include "history.h"
 #include "statistics.h"
-#include "database.h"   // ← NEW: needed to call Database::init()
+#include "database.h"
 
 Addtransaction::Addtransaction(QWidget *parent)
     : QWidget(parent)
@@ -21,7 +21,6 @@ Addtransaction::Addtransaction(QWidget *parent)
     ui->setupUi(this);
     setWindowTitle("SmartBudget - Add Transaction");
 
-
     if (!Database::init()) {
         QMessageBox::critical(this, "Database Error",
                               "Could not open smartbudget.db.\n"
@@ -29,7 +28,6 @@ Addtransaction::Addtransaction(QWidget *parent)
     } else {
         manager.loadFromDatabase();
     }
-
 
     connect(ui->pushButton, &QPushButton::clicked,
             this, &Addtransaction::onAddClicked);
@@ -103,7 +101,6 @@ void Addtransaction::onAddClicked()
     Transaction newTransaction(amount, type, category, date, currency);
 
     manager.addTransaction(newTransaction);
-
     refreshLabels();
 
     emit totalsChanged(
@@ -114,7 +111,29 @@ void Addtransaction::onAddClicked()
         manager.getHighestSpendingCategory()
         );
 
-controller.addTransactionToServer(newTransaction);
+    // Budget alerts — only relevant for expenses
+    if (type == "expense") {
+        QStringList exceeded   = manager.getExceededBudgetCategories();
+        QStringList approaching = manager.getApproachingBudgetCategories();
+
+        if (exceeded.contains(category)) {
+            QMessageBox::warning(this, "Budget Exceeded",
+                                 QString("⚠️ You have exceeded your budget for \"%1\"!\n"
+                                         "Remaining: %2 %3")
+                                     .arg(category)
+                                     .arg(QString::number(manager.budgetDifference(category), 'f', 2))
+                                     .arg(manager.getDisplayCurrency()));
+        } else if (approaching.contains(category)) {
+            QMessageBox::warning(this, "Approaching Budget Limit",
+                                 QString("⚠️ You are approaching your budget limit for \"%1\".\n"
+                                         "Remaining: %2 %3")
+                                     .arg(category)
+                                     .arg(QString::number(manager.budgetDifference(category), 'f', 2))
+                                     .arg(manager.getDisplayCurrency()));
+        }
+    }
+
+    controller.addTransactionToServer(newTransaction);
     QMessageBox::information(this, "Success", "Transaction added successfully.");
     clearInputs();
 }
@@ -135,9 +154,9 @@ void Addtransaction::updateSummaryLabels()
 void Addtransaction::refreshLabels()
 {
     QString cur = manager.getDisplayCurrency();
-    ui->balanceValueLabel->setText(QString::number(manager.getBalance(),       'f', 2) + " " + cur);
-    ui->incomeValueLabel->setText( QString::number(manager.getTotalIncome(),   'f', 2) + " " + cur);
-    ui->expensesValueLabel->setText(QString::number(manager.getTotalExpenses(),'f', 2) + " " + cur);
+    ui->balanceValueLabel->setText(  QString::number(manager.getBalance(),       'f', 2) + " " + cur);
+    ui->incomeValueLabel->setText(   QString::number(manager.getTotalIncome(),   'f', 2) + " " + cur);
+    ui->expensesValueLabel->setText( QString::number(manager.getTotalExpenses(), 'f', 2) + " " + cur);
 }
 
 BudgetManager* Addtransaction::getManager()
@@ -177,7 +196,7 @@ void Addtransaction::onDisplayCurrencyChanged(const QString& text)
     cur.remove("Display-");
     cur = cur.trimmed().toUpper();
 
-    if (cur == "CURRENCY") return;
+    if (cur == "CURRENCY" || cur == "DISPLAY") return;
 
     manager.setDisplayCurrency(cur);
     refreshLabels();

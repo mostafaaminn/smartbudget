@@ -31,6 +31,13 @@ public:
     void setMainWindow(Addtransaction* w);
     void updateStats();
 
+    // Called externally to trigger dialogs
+    void showMonthComparison();
+    void showSavingsGoals();
+    void addSavingsGoal();
+    void showBillReminders();
+    void addBillReminder();
+
 protected:
     void closeEvent(QCloseEvent *event) override;
 
@@ -39,15 +46,15 @@ private slots:
 
 private:
     Ui::statistics *ui;
-    BudgetManager* manager = nullptr;
+    BudgetManager*  manager    = nullptr;
     Addtransaction* mainWindow = nullptr;
 
     void updateCategoryRow(const QString& category,
                            const QMap<QString, double>& totals,
-                           QLabel* spentLabel,
+                           QLabel*    spentLabel,
                            QLineEdit* budgetInput,
-                           QLabel* remainingLabel,
+                           QLabel*    remainingLabel,
                            const QString& currency);
 };
 
-#endif
+#endif // STATISTICS_H

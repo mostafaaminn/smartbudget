@@ -1,4 +1,3 @@
-
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include <QVBoxLayout>
@@ -47,7 +46,6 @@ MainWindow::MainWindow(QWidget *parent)
 
     ui->stackedWidget->setCurrentWidget(ui->dashboardPage);
 
-
     BudgetManager* mgr = transactionWidget->getManager();
     updateDashboardTotals(
         mgr->getBalance(),
@@ -63,9 +61,13 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
+BudgetManager* MainWindow::getManager()
+{
+    return transactionWidget->getManager();
+}
+
 void MainWindow::showDashboard()
 {
-
     BudgetManager* mgr = transactionWidget->getManager();
     updateDashboardTotals(
         mgr->getBalance(),
@@ -99,7 +101,6 @@ void MainWindow::updateDashboardTotals(double balance, double income, double exp
 {
     Q_UNUSED(count);
     Q_UNUSED(highestCategory);
-
 
     QString cur = transactionWidget->getManager()->getDisplayCurrency();
     ui->dashboardBalanceLabel->setText( QString::number(balance,  'f', 2) + " " + cur);
