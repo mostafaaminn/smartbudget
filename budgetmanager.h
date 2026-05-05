@@ -42,6 +42,7 @@ public:
 
     // Budget
     void   setBudget(const QString& category, double amount);
+    void clearBudget(const QString& category);
     double getBudget(const QString& category) const;
     bool   isOverBudget(const QString& category) const;
     double budgetDifference(const QString& category) const;

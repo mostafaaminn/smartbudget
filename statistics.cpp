@@ -89,8 +89,12 @@ void statistics::updateCategoryRow(const QString& category,
     bool ok = false;
     double budget = budgetInput->text().toDouble(&ok);
 
-    if (ok && budget > 0 && manager)
-        manager->setBudget(category, budget);
+    if (manager) {
+        if (ok && budget > 0)
+            manager->setBudget(category, budget);
+        else if (budgetInput->text().trimmed().isEmpty())
+            manager->clearBudget(category);
+    }
 
     double remaining = manager ? manager->budgetDifference(category) : 0.0;
     remainingLabel->setText(QString::number(remaining, 'f', 2) + " " + currency);

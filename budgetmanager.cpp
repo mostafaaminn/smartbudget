@@ -354,3 +354,14 @@ QStringList BudgetManager::getUpcomingBills(QDate today, int withinDays) const
     }
     return result;
 }
+
+void BudgetManager::clearBudget(const QString& category)
+{
+    categoryBudgets.remove(category);
+    if (QSqlDatabase::database().isOpen()) {
+        QSqlQuery q;
+        q.prepare("DELETE FROM budgets WHERE category = :category;");
+        q.bindValue(":category", category);
+        q.exec();
+    }
+}
