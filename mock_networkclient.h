@@ -1,9 +1,7 @@
-#ifndef MOCK_NETWORKCLIENT_H
-#define MOCK_NETWORKCLIENT_H
-
-
-#include <gmock/gmock.h>
+#pragma once
 #include "INetworkClient.h"
+#include <gmock/gmock.h>
+#include <string>
 
 class MockNetworkClient : public INetworkClient
 {
@@ -14,5 +12,3 @@ public:
                 (const std::string& message), (override));
     MOCK_METHOD(bool, isConnected, (), (const, override));
 };
-
-#endif // MOCK_NETWORKCLIENT_H

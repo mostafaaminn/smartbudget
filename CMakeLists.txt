@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.19)
 project(SmartBudget LANGUAGES CXX)
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
@@ -42,13 +43,10 @@ qt_add_executable(SmartBudget
     Inetworkclient.h
     Budgetcontroller.h
     Budgetcontroller.cpp
-
 )
 
 target_compile_definitions(SmartBudget PRIVATE BOOST_ERROR_CODE_HEADER_ONLY)
 
-# ── CHANGED: added Qt6::Sql and Qt6::Network (was Qt::Core / Qt::Widgets) ────
-# Note: must be Qt6:: not Qt:: to match the find_package above
 target_link_libraries(SmartBudget
     PRIVATE
         Qt6::Core
@@ -57,8 +55,6 @@ target_link_libraries(SmartBudget
         Qt6::Network
 )
 
-# ── CHANGED: SmartBudgetServer also needs Qt6::Sql now because it includes ───
-# budgetmanager.cpp which calls Database:: methods
 add_executable(SmartBudgetServer
     server.cpp
     NetworkServer.cpp
@@ -75,7 +71,6 @@ add_executable(SmartBudgetServer
 
 target_compile_definitions(SmartBudgetServer PRIVATE BOOST_ERROR_CODE_HEADER_ONLY)
 
-# ── CHANGED: added Qt6::Sql (budgetmanager now depends on it) ─────────────────
 target_link_libraries(SmartBudgetServer
     PRIVATE
         Qt6::Core
@@ -86,6 +81,8 @@ enable_testing()
 
 add_executable(SmartBudgetTests
     test_budgetmanager.cpp
+    test_jsontools.cpp
+    test_budgetcontroller.cpp
     mock_networkclient.h
     Inetworkclient.h
     Budgetcontroller.h
@@ -125,4 +122,5 @@ qt_generate_deploy_app_script(
     OUTPUT_SCRIPT deploy_script
     NO_UNSUPPORTED_PLATFORM_ERROR
 )
+
 install(SCRIPT ${deploy_script})
